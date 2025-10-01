@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Builder - Step 1: Data Upload</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">Dashboard Builder</h1>
+                <div class="step-indicator">
+                    <div class="step active" data-step="1">
+                        <span class="step-number">1</span>
+                        <span class="step-label">Data Upload</span>
+                    </div>
+                    <div class="step" data-step="2">
+                        <span class="step-number">2</span>
+                        <span class="step-label">Data Cleaning</span>
+                    </div>
+                    <div class="step" data-step="3">
+                        <span class="step-number">3</span>
+                        <span class="step-label">Visualization</span>
+                    </div>
+                    <div class="step" data-step="4">
+                        <span class="step-number">4</span>
+                        <span class="step-label">Dashboard</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="step-container">
+                <div class="step-header">
+                    <h2 class="step-title">Step 1: Upload Your Data</h2>
+                    <p class="step-description">Upload a CSV file to begin building your dashboard. We'll help you preview and prepare your data.</p>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M10 9H9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3 class="upload-title">Upload CSV File</h3>
+                            <p class="upload-description">Drag and drop your CSV file here, or click to browse</p>
+                            <input type="file" id="fileInput" accept=".csv" hidden>
+                            <button class="upload-button" id="uploadButton">Choose File</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Preview Section -->
+                <div class="preview-section" id="previewSection" style="display: none;">
+                    <div class="preview-header">
+                        <h3 class="preview-title">Data Preview</h3>
+                        <div class="preview-info">
+                            <span class="file-name" id="fileName"></span>
+                            <span class="row-count" id="rowCount"></span>
+                        </div>
+                    </div>
+
+                    <!-- Column Management -->
+                    <div class="column-management">
+                        <h4 class="column-title">Columns</h4>
+                        <div class="column-list" id="columnList"></div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <table class="data-table" id="dataTable">
+                                <thead id="tableHead"></thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation Section -->
+                <div class="confirmation-section" id="confirmationSection" style="display: none;">
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirm Your Data</h3>
+                        <p class="confirmation-description">Please review your data and column names. You can rename columns if needed before proceeding.</p>
+                        <div class="confirmation-actions">
+                            <button class="btn btn-secondary" id="editColumnsBtn">Edit Column Names</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button class="btn btn-outline" id="prevBtn" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Previous Step
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn" disabled>
+                        Next Step
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Column Rename Modal -->
+    <div class="modal" id="columnModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Column Names</h3>
+                <button class="modal-close" id="modalClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="column-edit-list" id="columnEditList"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelRename">Cancel</button>
+                <button class="btn btn-primary" id="saveRename">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
