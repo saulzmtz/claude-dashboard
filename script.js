@@ -335,11 +335,8 @@ function handleNextStep() {
     localStorage.setItem('dashboardData', JSON.stringify(currentData));
     localStorage.setItem('columnTypes', JSON.stringify(columnTypes));
     
-    // For now, just show an alert since we're only building Step 1
-    alert('Data uploaded successfully! This would proceed to Step 2: Data Cleaning in the full application.');
-    
-    // In a real application, you would navigate to the next step:
-    // window.location.href = 'step2.html';
+    // Navigate to Step 2: Data Cleaning
+    window.location.href = 'step2.html';
 }
 
 function handlePreviousStep() {
