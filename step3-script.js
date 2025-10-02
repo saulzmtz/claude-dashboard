@@ -124,7 +124,7 @@ class ChartGenerator {
                             self.updateDataSummary();
                             self.populateFieldOptions();
                             self.updateVisualLibrary();
-                            self.showStep(1);
+                            self.goToStep(1);
                             return;
                         } else {
                             self.showError('No cleaned data found from Step 2. Please go back and clean your data first.');
@@ -146,7 +146,7 @@ class ChartGenerator {
                 self.updateDataSummary();
                 self.populateFieldOptions();
                 self.updateVisualLibrary();
-                self.showStep(1);
+                self.goToStep(1);
                 
             } catch (error) {
                 console.error('Error loading data on attempt', attempt + 1, ':', error);
