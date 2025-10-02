@@ -71,28 +71,60 @@ class ChartGenerator {
     }
 
     loadDataFromStep2() {
-        try {
-            const storedData = localStorage.getItem('cleanedData');
-            const storedTypes = localStorage.getItem('columnTypes');
-            
-            if (!storedData) {
-                this.showError('No cleaned data found from Step 2. Please go back and clean your data first.');
-                return;
-            }
+        // Try to load data with retry mechanism
+        this.attemptDataLoad(0);
+    }
 
-            this.cleanedData = JSON.parse(storedData);
-            this.columnTypes = JSON.parse(storedTypes || '{}');
-            this.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
-            
-            this.updateDataSummary();
-            this.populateFieldOptions();
-            this.updateVisualLibrary();
-            this.showStep(1);
-            
-        } catch (error) {
-            console.error('Error loading data:', error);
-            this.showError('Error loading cleaned data from Step 2. Please try cleaning your data again.');
-        }
+    attemptDataLoad(attempt) {
+        const maxAttempts = 5;
+        const delay = attempt * 200; // 0ms, 200ms, 400ms, 600ms, 800ms
+
+        setTimeout(() => {
+            try {
+                const storedData = localStorage.getItem('cleanedData');
+                const storedTypes = localStorage.getItem('columnTypes');
+                
+                console.log('Attempt', attempt + 1, 'to load data:', {
+                    hasCleanedData: !!storedData,
+                    hasColumnTypes: !!storedTypes,
+                    cleanedDataLength: storedData ? JSON.parse(storedData).length : 0
+                });
+                
+                if (!storedData) {
+                    if (attempt < maxAttempts - 1) {
+                        console.log('No data found, retrying...');
+                        this.attemptDataLoad(attempt + 1);
+                        return;
+                    } else {
+                        this.showError('No cleaned data found from Step 2. Please go back and clean your data first.');
+                        return;
+                    }
+                }
+
+                this.cleanedData = JSON.parse(storedData);
+                this.columnTypes = JSON.parse(storedTypes || '{}');
+                this.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
+                
+                console.log('Data loaded successfully:', {
+                    rows: this.cleanedData.length,
+                    columns: Object.keys(this.cleanedData[0] || {}).length,
+                    types: Object.keys(this.columnTypes).length
+                });
+                
+                this.updateDataSummary();
+                this.populateFieldOptions();
+                this.updateVisualLibrary();
+                this.showStep(1);
+                
+            } catch (error) {
+                console.error('Error loading data on attempt', attempt + 1, ':', error);
+                if (attempt < maxAttempts - 1) {
+                    this.attemptDataLoad(attempt + 1);
+                } else {
+                    this.showError('Error loading cleaned data from Step 2. Please try cleaning your data again.');
+                }
+            }
+        }, delay);
     }
 
     updateDataSummary() {
@@ -640,7 +672,58 @@ class ChartGenerator {
     }
 
     showError(message) {
-        alert(message);
+        // Create a more user-friendly error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 400px;
+            text-align: center;
+        `;
+        
+        errorDiv.innerHTML = `
+            <div style="color: #ef4444; font-size: 1.5rem; margin-bottom: 1rem;">⚠️</div>
+            <h3 style="color: #1f2937; margin-bottom: 1rem;">Data Loading Issue</h3>
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">${message}</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="window.location.href='step2.html'" style="
+                    background: #1aa7ee;
+                    color: white;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 500;
+                ">Go to Data Cleaning</button>
+                <button onclick="this.parentElement.parentElement.remove()" style="
+                    background: #f3f4f6;
+                    color: #374151;
+                    border: 1px solid #d1d5db;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 500;
+                ">Close</button>
+            </div>
+        `;
+        
+        document.body.appendChild(errorDiv);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (errorDiv.parentElement) {
+                errorDiv.remove();
+            }
+        }, 10000);
     }
 }
 
