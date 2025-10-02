@@ -58,6 +58,10 @@ class DataCleaner {
             this.cleanedData = JSON.parse(storedData);
             this.columnTypes = JSON.parse(storedTypes || '{}');
             
+            // Store cleaned data immediately (in case user skips all steps)
+            localStorage.setItem('cleanedData', JSON.stringify(this.cleanedData));
+            localStorage.setItem('columnTypes', JSON.stringify(this.columnTypes));
+            
             this.updateDataSummary();
             this.startCleaningProcess();
             
@@ -842,8 +846,12 @@ class DataCleaner {
     goToNextStep() {
         if (this.currentStep === this.totalSteps && this.completedSteps.size === this.totalSteps) {
             // Store data and go to next step (Step 3)
-            alert('Data cleaning complete! This would proceed to Step 3: Visualization in the full application.');
-            // window.location.href = 'step3.html';
+            localStorage.setItem('cleanedData', JSON.stringify(this.cleanedData));
+            localStorage.setItem('columnTypes', JSON.stringify(this.columnTypes));
+            localStorage.setItem('cleaningStats', JSON.stringify(this.cleaningStats));
+            
+            // Navigate to Step 3: Visualization
+            window.location.href = 'step3.html';
         }
     }
 
