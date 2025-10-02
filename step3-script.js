@@ -78,6 +78,7 @@ class ChartGenerator {
     attemptDataLoad(attempt) {
         const maxAttempts = 5;
         const delay = attempt * 200; // 0ms, 200ms, 400ms, 600ms, 800ms
+        const self = this; // Store reference to this
 
         setTimeout(() => {
             try {
@@ -112,47 +113,47 @@ class ChartGenerator {
                         
                         if (fallbackData) {
                             console.log('Using fallback data from Step 1');
-                            this.cleanedData = JSON.parse(fallbackData);
-                            this.columnTypes = JSON.parse(fallbackTypes || '{}');
-                            this.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
+                            self.cleanedData = JSON.parse(fallbackData);
+                            self.columnTypes = JSON.parse(fallbackTypes || '{}');
+                            self.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
                             
                             // Store as cleaned data for consistency
-                            localStorage.setItem('cleanedData', JSON.stringify(this.cleanedData));
-                            localStorage.setItem('columnTypes', JSON.stringify(this.columnTypes));
+                            localStorage.setItem('cleanedData', JSON.stringify(self.cleanedData));
+                            localStorage.setItem('columnTypes', JSON.stringify(self.columnTypes));
                             
-                            this.updateDataSummary();
-                            this.populateFieldOptions();
-                            this.updateVisualLibrary();
-                            this.showStep(1);
+                            self.updateDataSummary();
+                            self.populateFieldOptions();
+                            self.updateVisualLibrary();
+                            self.showStep(1);
                             return;
                         } else {
-                            this.showError('No cleaned data found from Step 2. Please go back and clean your data first.');
+                            self.showError('No cleaned data found from Step 2. Please go back and clean your data first.');
                             return;
                         }
                     }
                 }
 
-                this.cleanedData = JSON.parse(storedData);
-                this.columnTypes = JSON.parse(storedTypes || '{}');
-                this.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
+                self.cleanedData = JSON.parse(storedData);
+                self.columnTypes = JSON.parse(storedTypes || '{}');
+                self.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
                 
                 console.log('Data loaded successfully:', {
-                    rows: this.cleanedData.length,
-                    columns: Object.keys(this.cleanedData[0] || {}).length,
-                    types: Object.keys(this.columnTypes).length
+                    rows: self.cleanedData.length,
+                    columns: Object.keys(self.cleanedData[0] || {}).length,
+                    types: Object.keys(self.columnTypes).length
                 });
                 
-                this.updateDataSummary();
-                this.populateFieldOptions();
-                this.updateVisualLibrary();
-                this.showStep(1);
+                self.updateDataSummary();
+                self.populateFieldOptions();
+                self.updateVisualLibrary();
+                self.showStep(1);
                 
             } catch (error) {
                 console.error('Error loading data on attempt', attempt + 1, ':', error);
                 if (attempt < maxAttempts - 1) {
-                    this.attemptDataLoad(attempt + 1);
+                    self.attemptDataLoad(attempt + 1);
                 } else {
-                    this.showError('Error loading cleaned data from Step 2. Please try cleaning your data again.');
+                    self.showError('Error loading cleaned data from Step 2. Please try cleaning your data again.');
                 }
             }
         }, delay);
