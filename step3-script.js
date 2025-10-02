@@ -81,6 +81,15 @@ class ChartGenerator {
 
         setTimeout(() => {
             try {
+                // Debug: Check all localStorage keys
+                console.log('All localStorage keys:', Object.keys(localStorage));
+                console.log('localStorage contents:', {
+                    dashboardData: localStorage.getItem('dashboardData') ? 'exists' : 'missing',
+                    cleanedData: localStorage.getItem('cleanedData') ? 'exists' : 'missing',
+                    columnTypes: localStorage.getItem('columnTypes') ? 'exists' : 'missing',
+                    visualLibrary: localStorage.getItem('visualLibrary') ? 'exists' : 'missing'
+                });
+                
                 const storedData = localStorage.getItem('cleanedData');
                 const storedTypes = localStorage.getItem('columnTypes');
                 
@@ -96,8 +105,30 @@ class ChartGenerator {
                         this.attemptDataLoad(attempt + 1);
                         return;
                     } else {
-                        this.showError('No cleaned data found from Step 2. Please go back and clean your data first.');
-                        return;
+                        // Try fallback: load original data from Step 1
+                        console.log('Trying fallback: loading original data from Step 1');
+                        const fallbackData = localStorage.getItem('dashboardData');
+                        const fallbackTypes = localStorage.getItem('columnTypes');
+                        
+                        if (fallbackData) {
+                            console.log('Using fallback data from Step 1');
+                            this.cleanedData = JSON.parse(fallbackData);
+                            this.columnTypes = JSON.parse(fallbackTypes || '{}');
+                            this.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
+                            
+                            // Store as cleaned data for consistency
+                            localStorage.setItem('cleanedData', JSON.stringify(this.cleanedData));
+                            localStorage.setItem('columnTypes', JSON.stringify(this.columnTypes));
+                            
+                            this.updateDataSummary();
+                            this.populateFieldOptions();
+                            this.updateVisualLibrary();
+                            this.showStep(1);
+                            return;
+                        } else {
+                            this.showError('No cleaned data found from Step 2. Please go back and clean your data first.');
+                            return;
+                        }
                     }
                 }
 

@@ -846,9 +846,22 @@ class DataCleaner {
     goToNextStep() {
         if (this.currentStep === this.totalSteps && this.completedSteps.size === this.totalSteps) {
             // Store data and go to next step (Step 3)
+            console.log('Storing data for Step 3:', {
+                cleanedDataLength: this.cleanedData.length,
+                columnTypesCount: Object.keys(this.columnTypes).length,
+                cleaningStats: this.cleaningStats
+            });
+            
             localStorage.setItem('cleanedData', JSON.stringify(this.cleanedData));
             localStorage.setItem('columnTypes', JSON.stringify(this.columnTypes));
             localStorage.setItem('cleaningStats', JSON.stringify(this.cleaningStats));
+            
+            // Verify data was stored
+            const storedData = localStorage.getItem('cleanedData');
+            console.log('Data storage verification:', {
+                stored: !!storedData,
+                length: storedData ? JSON.parse(storedData).length : 0
+            });
             
             // Navigate to Step 3: Visualization
             window.location.href = 'step3.html';
