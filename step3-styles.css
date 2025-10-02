@@ -1,0 +1,679 @@
+/* Step 3: Chart Generator Styles */
+
+/* Data Summary */
+.data-summary {
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 2rem;
+    justify-content: space-around;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.summary-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* Chart Creation Container */
+.chart-creation-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+/* Creation Steps */
+.creation-step {
+    border-bottom: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.creation-step:last-child {
+    border-bottom: none;
+}
+
+.creation-step.active {
+    background: rgba(26, 167, 238, 0.05);
+}
+
+.creation-step .step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.creation-step .step-header:hover {
+    background: rgba(26, 167, 238, 0.05);
+}
+
+.creation-step .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.125rem;
+    transition: all 0.3s ease;
+}
+
+.creation-step.active .step-number {
+    background: #1aa7ee;
+    color: white;
+    box-shadow: 0 4px 15px rgba(26, 167, 238, 0.3);
+}
+
+.creation-step .step-info {
+    flex: 1;
+}
+
+.creation-step .step-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.creation-step .step-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.creation-step .step-content {
+    padding: 0 2rem 2rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    margin-top: -1px;
+}
+
+/* Metric Selection */
+.metric-selection {
+    margin-bottom: 1.5rem;
+}
+
+.metric-type-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    color: #6b7280;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: #1aa7ee;
+    border-bottom-color: #1aa7ee;
+}
+
+.tab-btn:hover {
+    color: #1aa7ee;
+}
+
+.metric-option {
+    display: none;
+}
+
+.metric-option.active {
+    display: block;
+}
+
+.metric-option h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.field-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.field-option:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.field-option.selected {
+    background: rgba(26, 167, 238, 0.1);
+    border-color: #1aa7ee;
+}
+
+.field-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #1aa7ee;
+}
+
+.field-option .field-info {
+    flex: 1;
+}
+
+.field-name {
+    font-weight: 500;
+    color: #374151;
+}
+
+.field-type {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.calculated-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.calculated-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.calculated-item label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+    min-width: 150px;
+}
+
+.calculated-item input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #1aa7ee;
+}
+
+.field-select {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    background: white;
+}
+
+.field-select:focus {
+    outline: none;
+    border-color: #1aa7ee;
+    box-shadow: 0 0 0 3px rgba(26, 167, 238, 0.1);
+}
+
+/* Grouping Selection */
+.grouping-selection h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+.grouping-options {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.grouping-options h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.option-item label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+}
+
+.option-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #1aa7ee;
+}
+
+.number-input {
+    width: 60px;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.number-input:focus {
+    outline: none;
+    border-color: #1aa7ee;
+    box-shadow: 0 0 0 3px rgba(26, 167, 238, 0.1);
+}
+
+/* Chart Type Selection */
+.chart-type-selection {
+    margin-bottom: 1.5rem;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.chart-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.chart-option:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chart-option.selected {
+    background: rgba(26, 167, 238, 0.1);
+    border-color: #1aa7ee;
+    box-shadow: 0 4px 15px rgba(26, 167, 238, 0.2);
+}
+
+.chart-icon {
+    color: #6b7280;
+    margin-bottom: 1rem;
+    transition: color 0.3s ease;
+}
+
+.chart-option:hover .chart-icon,
+.chart-option.selected .chart-icon {
+    color: #1aa7ee;
+}
+
+.chart-option h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.chart-option p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Preview Section */
+.preview-section {
+    margin-bottom: 1.5rem;
+}
+
+.chart-title-editor {
+    margin-bottom: 1.5rem;
+}
+
+.chart-title-editor label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.title-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.title-input:focus {
+    outline: none;
+    border-color: #1aa7ee;
+    box-shadow: 0 0 0 3px rgba(26, 167, 238, 0.1);
+}
+
+.chart-preview-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-preview {
+    position: relative;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-placeholder {
+    text-align: center;
+    color: #6b7280;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #1aa7ee;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.chart-summary {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.chart-summary h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.chart-summary p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Visual Library */
+.visual-library {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.library-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.library-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.library-header p {
+    color: #6b7280;
+    margin: 0;
+}
+
+.library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.library-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.library-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.library-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.library-item-title {
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.library-item-type {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.library-item-preview {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.library-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.library-item-actions button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.library-item-actions button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.library-item-actions .delete-btn {
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.library-item-actions .delete-btn:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+/* Create Another */
+.create-another {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Step Actions */
+.step-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .summary-card {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .creation-step .step-header {
+        padding: 1rem;
+    }
+    
+    .creation-step .step-content {
+        padding: 0 1rem 1.5rem 1rem;
+    }
+    
+    .field-grid,
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .metric-type-tabs {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .tab-btn {
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 0;
+    }
+    
+    .calculated-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .calculated-item label {
+        min-width: auto;
+    }
+    
+    .step-actions {
+        flex-direction: column;
+    }
+    
+    .library-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation for step transitions */
+.creation-step {
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Chart.js canvas styling */
+.chart-preview canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Loading states */
+.loading-state {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* Success animations */
+.library-item {
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
