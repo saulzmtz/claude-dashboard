@@ -158,7 +158,7 @@ class ChartGenerator {
                         if (fallbackData) {
                             console.log('Using fallback data from Step 1');
                             self.cleanedData = JSON.parse(fallbackData);
-                            self.columnTypes = JSON.parse(fallbackTypes || '{}');
+                            self.columnTypes = self.detectColumnTypes(self.cleanedData);
                             self.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
                             
                             // Store as cleaned data for consistency
@@ -180,6 +180,9 @@ class ChartGenerator {
                 self.cleanedData = JSON.parse(storedData);
                 self.columnTypes = JSON.parse(storedTypes || '{}');
                 self.visualLibrary = JSON.parse(localStorage.getItem('visualLibrary') || '[]');
+                
+                // Re-detect column types with improved detection
+                self.columnTypes = self.detectColumnTypes(self.cleanedData);
                 
                 console.log('Data loaded successfully:', {
                     rows: self.cleanedData.length,
@@ -213,6 +216,67 @@ class ChartGenerator {
         document.getElementById('totalRows').textContent = totalRows.toLocaleString();
         document.getElementById('totalColumns').textContent = totalColumns;
         document.getElementById('chartsCreated').textContent = chartsCreated;
+    }
+
+    detectColumnTypes(data) {
+        if (!data || data.length === 0) return {};
+        
+        const types = {};
+        const headers = Object.keys(data[0]);
+        
+        headers.forEach(header => {
+            const values = data.map(row => row[header]).filter(val => val !== '');
+            
+            if (values.length === 0) {
+                types[header] = 'string';
+                return;
+            }
+            
+            // Check if all values are numbers (including strings that can be parsed as numbers)
+            const allNumbers = values.every(val => {
+                // Remove common currency symbols, commas, and whitespace
+                const cleaned = val.toString().replace(/[$,\s]/g, '');
+                return !isNaN(parseFloat(cleaned)) && isFinite(parseFloat(cleaned)) && cleaned !== '';
+            });
+            
+            // Also check if column name suggests it's numeric (Amount, Price, Cost, etc.)
+            const numericKeywords = ['amount', 'price', 'cost', 'value', 'total', 'sum', 'count', 'quantity', 'number', 'num'];
+            const isNumericColumn = numericKeywords.some(keyword => 
+                header.toLowerCase().includes(keyword)
+            );
+            
+            if (allNumbers || (isNumericColumn && values.some(val => {
+                const cleaned = val.toString().replace(/[$,\s]/g, '');
+                return !isNaN(parseFloat(cleaned)) && isFinite(parseFloat(cleaned)) && cleaned !== '';
+            }))) {
+                types[header] = 'number';
+                return;
+            }
+            
+            // Check if all values are dates
+            const allDates = values.every(val => !isNaN(Date.parse(val)));
+            if (allDates) {
+                types[header] = 'date';
+                return;
+            }
+            
+            // Check if all values are booleans
+            const allBooleans = values.every(val => 
+                val.toLowerCase() === 'true' || 
+                val.toLowerCase() === 'false' ||
+                val.toLowerCase() === 'yes' ||
+                val.toLowerCase() === 'no'
+            );
+            if (allBooleans) {
+                types[header] = 'boolean';
+                return;
+            }
+            
+            // Default to string
+            types[header] = 'string';
+        });
+        
+        return types;
     }
 
     populateFieldOptions() {
