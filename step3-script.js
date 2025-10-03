@@ -15,6 +15,7 @@ class ChartGenerator {
         };
         
         this.initializeEventListeners();
+        this.initializeNavigation();
         this.loadDataFromStep2();
     }
 
@@ -68,6 +69,49 @@ class ChartGenerator {
         document.getElementById('chartTitle').addEventListener('input', (e) => {
             this.currentChart.title = e.target.value;
         });
+    }
+
+    initializeNavigation() {
+        // Make Dataize title clickable to go home
+        const appTitle = document.querySelector('.app-title');
+        if (appTitle) {
+            appTitle.style.cursor = 'pointer';
+            appTitle.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        }
+        
+        // Make step buttons clickable
+        const stepButtons = document.querySelectorAll('.step[data-step]');
+        stepButtons.forEach(step => {
+            step.addEventListener('click', (e) => {
+                const stepNumber = parseInt(step.dataset.step);
+                this.navigateToStep(stepNumber);
+            });
+        });
+    }
+
+    navigateToStep(stepNumber) {
+        switch(stepNumber) {
+            case 1:
+                window.location.href = 'index.html';
+                break;
+            case 2:
+                window.location.href = 'step2.html';
+                break;
+            case 3:
+                // Already on step 3
+                break;
+            case 4:
+                if (this.visualLibrary.length > 0) {
+                    // Store visual library and navigate to step 4
+                    localStorage.setItem('visualLibrary', JSON.stringify(this.visualLibrary));
+                    window.location.href = 'step4.html';
+                } else {
+                    alert('Please create at least one chart before proceeding to Step 4.');
+                }
+                break;
+        }
     }
 
     loadDataFromStep2() {

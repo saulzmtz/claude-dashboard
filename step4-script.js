@@ -19,6 +19,7 @@ class DashboardEditor {
         };
         
         this.initializeEventListeners();
+        this.initializeNavigation();
         this.loadDataFromStep3();
     }
 
@@ -89,6 +90,43 @@ class DashboardEditor {
 
         // Canvas interactions
         this.initializeCanvasListeners();
+    }
+
+    initializeNavigation() {
+        // Make Dataize title clickable to go home
+        const appTitle = document.querySelector('.app-title');
+        if (appTitle) {
+            appTitle.style.cursor = 'pointer';
+            appTitle.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        }
+        
+        // Make step buttons clickable
+        const stepButtons = document.querySelectorAll('.step[data-step]');
+        stepButtons.forEach(step => {
+            step.addEventListener('click', (e) => {
+                const stepNumber = parseInt(step.dataset.step);
+                this.navigateToStep(stepNumber);
+            });
+        });
+    }
+
+    navigateToStep(stepNumber) {
+        switch(stepNumber) {
+            case 1:
+                window.location.href = 'index.html';
+                break;
+            case 2:
+                window.location.href = 'step2.html';
+                break;
+            case 3:
+                window.location.href = 'step3.html';
+                break;
+            case 4:
+                // Already on step 4
+                break;
+        }
     }
 
     loadDataFromStep3() {
@@ -196,7 +234,7 @@ class DashboardEditor {
         // Get unique values for each filter type
         const regions = [...new Set(this.cleanedData.map(row => row.Region || row.region).filter(Boolean))];
         const people = [...new Set(this.cleanedData.map(row => row.Owner || row.owner || row.Person || row.person).filter(Boolean))];
-        const companies = [...new Set(this.cleanedData.map(row => row.Company || row.company || row.Organization || row.organization).filter(Boolean))];
+        const companies = [...new Set(this.cleanedData.map(row => row.Company || row.company).filter(Boolean))];
 
         // Populate region filters
         this.populateFilterCheckboxes('regionFilters', regions);
@@ -213,9 +251,10 @@ class DashboardEditor {
 
     populateFilterCheckboxes(containerId, values) {
         const container = document.getElementById(containerId);
-        container.innerHTML = '';
+        if (!container) return;
 
-        values.forEach(value => {
+        container.innerHTML = '';
+        values.slice(0, 10).forEach(value => { // Limit to first 10 values
             const checkbox = document.createElement('div');
             checkbox.className = 'filter-checkbox';
             checkbox.innerHTML = `
@@ -227,24 +266,26 @@ class DashboardEditor {
     }
 
     populateNumericRangeFilter() {
-        const numericFields = Object.keys(this.columnTypes).filter(field => this.columnTypes[field] === 'number');
+        const numericFields = Object.keys(this.columnTypes).filter(col => this.columnTypes[col] === 'number');
+        const fieldSelect = document.getElementById('numericFieldSelect');
         
-        if (numericFields.length === 0) {
-            document.getElementById('numericRangeFilter').innerHTML = '<p>No numeric fields found</p>';
-            return;
+        if (fieldSelect) {
+            fieldSelect.innerHTML = '<option value="">Select field...</option>';
+            numericFields.forEach(field => {
+                fieldSelect.innerHTML += `<option value="${field}">${field}</option>`;
+            });
         }
 
-        const container = document.getElementById('numericRangeFilter');
-        container.innerHTML = `
-            <select id="numericFieldSelect" class="select-input">
-                <option value="">Select field...</option>
-                ${numericFields.map(field => `<option value="${field}">${field}</option>`).join('')}
-            </select>
-            <div class="range-inputs">
-                <input type="number" id="numericMin" class="range-input" placeholder="Min">
-                <input type="number" id="numericMax" class="range-input" placeholder="Max">
-            </div>
-        `;
+        // Add range inputs
+        const rangeContainer = document.getElementById('numericRangeContainer');
+        if (rangeContainer) {
+            rangeContainer.innerHTML = `
+                <div class="range-inputs">
+                    <input type="number" id="numericMin" class="range-input" placeholder="Min">
+                    <input type="number" id="numericMax" class="range-input" placeholder="Max">
+                </div>
+            `;
+        }
     }
 
     initializeFilterListeners() {
@@ -312,9 +353,9 @@ class DashboardEditor {
     }
 
     updateNumericRangeFilter() {
-        const field = document.getElementById('numericFieldSelect').value;
-        const min = document.getElementById('numericMin').value;
-        const max = document.getElementById('numericMax').value;
+        const field = document.getElementById('numericFieldSelect')?.value;
+        const min = document.getElementById('numericMin')?.value;
+        const max = document.getElementById('numericMax')?.value;
         
         if (field) {
             this.filters.numericRange = {
@@ -322,19 +363,16 @@ class DashboardEditor {
                 min: min ? parseFloat(min) : null,
                 max: max ? parseFloat(max) : null
             };
-        } else {
-            this.filters.numericRange = { min: null, max: null };
         }
         
         this.applyFilters();
     }
 
     applyFilters() {
-        // This would filter the data and update all charts
-        // For now, just log the filters
+        // This would implement the actual filtering logic
+        // For now, just log the current filters
         console.log('Applying filters:', this.filters);
         
-        // In a real implementation, you would:
         // 1. Filter the cleanedData based on current filters
         // 2. Update all chart widgets with filtered data
         // 3. Re-render charts with new data
@@ -384,15 +422,15 @@ class DashboardEditor {
         if (!chart) return;
 
         const widget = this.createChartWidget(chart);
-        document.getElementById('canvasGrid').appendChild(widget);
+        const canvas = document.getElementById('canvasGrid');
+        canvas.appendChild(widget);
         
         this.dashboardCharts.push({
-            id: Date.now().toString(),
-            chartId: chartId,
-            chart: chart,
-            element: widget
+            id: chartId,
+            widget: widget,
+            chart: chart
         });
-
+        
         this.updateCanvasInfo();
     }
 
@@ -403,41 +441,27 @@ class DashboardEditor {
         
         widget.innerHTML = `
             <div class="chart-widget-header">
-                <h4 class="chart-widget-title">${chart.title}</h4>
+                <h3 class="chart-widget-title">${chart.title}</h3>
                 <div class="chart-widget-actions">
-                    <button class="chart-widget-action edit" title="Edit Properties">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11 4H4C3.44772 4 3 4.44772 3 5V19C3 19.5523 3.44772 20 4 20H18C18.5523 20 19 19.5523 19 19V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <button class="chart-widget-action delete" title="Delete">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6M19 6V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
+                    <button class="chart-widget-action edit" title="Edit">✏️</button>
+                    <button class="chart-widget-action delete" title="Delete">🗑️</button>
                 </div>
             </div>
             <div class="chart-widget-content">
-                <div class="chart-widget-chart" id="chart-${chart.id}">
-                    <div class="loading">Loading chart...</div>
-                </div>
+                <div class="chart-widget-chart"></div>
             </div>
             <div class="chart-widget-resize"></div>
         `;
-
+        
         // Add event listeners
-        widget.querySelector('.edit').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.editWidget(widget);
+        widget.querySelector('.chart-widget-action.edit').addEventListener('click', () => {
+            this.openPropertiesPanel(widget);
         });
-
-        widget.querySelector('.delete').addEventListener('click', (e) => {
-            e.stopPropagation();
+        
+        widget.querySelector('.chart-widget-action.delete').addEventListener('click', () => {
             this.deleteWidget(widget);
         });
-
+        
         // Render the chart
         this.renderChartInWidget(widget, chart);
 
@@ -492,13 +516,7 @@ class DashboardEditor {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: chart.type !== 'pie',
-                        labels: {
-                            color: this.currentTheme === 'dark' ? '#f9fafb' : '#374151',
-                            font: {
-                                size: this.currentFontSize
-                            }
-                        }
+                        display: chart.type !== 'pie'
                     },
                     title: {
                         display: false
@@ -507,26 +525,10 @@ class DashboardEditor {
             }
         };
 
-        // Apply number formatting
-        if (chart.type !== 'pie' && chart.type !== 'table') {
-            baseConfig.options.scales = {
-                y: {
-                    ticks: {
-                        callback: (value) => this.formatNumber(value),
-                        color: this.currentTheme === 'dark' ? '#f9fafb' : '#374151',
-                        font: {
-                            size: this.currentFontSize
-                        }
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: this.currentTheme === 'dark' ? '#f9fafb' : '#374151',
-                        font: {
-                            size: this.currentFontSize
-                        }
-                    }
-                }
+        // Apply theme
+        if (this.currentTheme === 'dark') {
+            baseConfig.options.plugins.legend.labels = {
+                color: '#f9fafb'
             };
         }
 
@@ -535,132 +537,86 @@ class DashboardEditor {
 
     getChartType(type) {
         switch (type) {
-            case 'bar': return 'bar';
-            case 'line': return 'line';
-            case 'pie': return 'pie';
-            case 'table': return 'table';
-            case 'kpi': return 'kpi';
-            default: return 'bar';
-        }
-    }
-
-    formatNumber(value) {
-        switch (this.currentNumberFormat) {
-            case 'thousands':
-                return (value / 1000).toFixed(1) + 'K';
-            case 'millions':
-                return (value / 1000000).toFixed(1) + 'M';
-            case 'percentages':
-                return value + '%';
-            case 'currency':
-                return '$' + value.toLocaleString();
+            case 'bar':
+                return 'bar';
+            case 'line':
+                return 'line';
+            case 'pie':
+                return 'pie';
+            case 'table':
+                return 'table';
+            case 'kpi':
+                return 'kpi';
             default:
-                return value.toLocaleString();
+                return 'bar';
         }
     }
 
     addTextWidget() {
         const widget = document.createElement('div');
         widget.className = 'text-widget';
-        widget.dataset.widgetId = Date.now().toString();
-        
         widget.innerHTML = `
-            <textarea class="text-widget-content" placeholder="Enter text...">New Text Block</textarea>
+            <textarea class="text-widget-content" placeholder="Enter text..."></textarea>
         `;
-
-        document.getElementById('canvasGrid').appendChild(widget);
-        this.selectWidget(widget);
         
-        // Focus the textarea
-        const textarea = widget.querySelector('.text-widget-content');
-        textarea.focus();
-        textarea.select();
+        const canvas = document.getElementById('canvasGrid');
+        canvas.appendChild(widget);
+        
+        this.dashboardCharts.push({
+            id: 'text_' + Date.now(),
+            widget: widget,
+            type: 'text'
+        });
+        
+        this.updateCanvasInfo();
     }
 
     selectWidget(widget) {
         this.deselectWidget();
-        widget.classList.add('selected');
         this.selectedWidget = widget;
+        widget.classList.add('selected');
+        this.openPropertiesPanel(widget);
     }
 
     deselectWidget() {
-        document.querySelectorAll('.chart-widget, .text-widget').forEach(w => {
-            w.classList.remove('selected');
-        });
-        this.selectedWidget = null;
+        if (this.selectedWidget) {
+            this.selectedWidget.classList.remove('selected');
+            this.selectedWidget = null;
+        }
         this.closePropertiesPanel();
     }
 
-    editWidget(widget) {
-        this.selectWidget(widget);
-        this.openPropertiesPanel();
+    deleteWidget(widget) {
+        if (confirm('Are you sure you want to delete this widget?')) {
+            widget.remove();
+            this.dashboardCharts = this.dashboardCharts.filter(item => item.widget !== widget);
+            this.updateCanvasInfo();
+        }
     }
 
-    openPropertiesPanel() {
+    openPropertiesPanel(widget) {
         const panel = document.getElementById('propertiesPanel');
-        panel.style.display = 'block';
-        panel.classList.add('open');
-        
-        if (this.selectedWidget) {
-            this.populatePropertiesPanel();
+        if (panel) {
+            panel.classList.add('open');
         }
     }
 
     closePropertiesPanel() {
         const panel = document.getElementById('propertiesPanel');
-        panel.classList.remove('open');
-        setTimeout(() => {
-            panel.style.display = 'none';
-        }, 300);
-    }
-
-    populatePropertiesPanel() {
-        if (!this.selectedWidget) return;
-
-        const title = this.selectedWidget.querySelector('.chart-widget-title')?.textContent || '';
-        document.getElementById('chartTitleInput').value = title;
+        if (panel) {
+            panel.classList.remove('open');
+        }
     }
 
     applyProperties() {
-        if (!this.selectedWidget) return;
-
-        const title = document.getElementById('chartTitleInput').value;
-        const backgroundColor = document.getElementById('backgroundColorInput').value;
-        const borderColor = document.getElementById('borderColorInput').value;
-        const padding = document.getElementById('paddingSlider').value;
-        const fontSize = document.getElementById('chartFontSizeSlider').value;
-
-        // Update widget appearance
-        this.selectedWidget.style.backgroundColor = backgroundColor;
-        this.selectedWidget.style.borderColor = borderColor;
-        this.selectedWidget.style.padding = padding + 'px';
-        this.selectedWidget.style.fontSize = fontSize + 'px';
-
-        // Update title if it's a chart widget
-        const titleElement = this.selectedWidget.querySelector('.chart-widget-title');
-        if (titleElement) {
-            titleElement.textContent = title;
-        }
-
+        // Apply properties from the properties panel
+        console.log('Applying properties...');
         this.closePropertiesPanel();
     }
 
     deleteSelectedWidget() {
-        if (!this.selectedWidget) return;
-        this.deleteWidget(this.selectedWidget);
-    }
-
-    deleteWidget(widget) {
-        widget.remove();
-        this.deselectWidget();
-        this.updateCanvasInfo();
-    }
-
-    clearCanvas() {
-        if (confirm('Are you sure you want to clear the canvas? This will remove all charts and text blocks.')) {
-            document.getElementById('canvasGrid').innerHTML = '';
-            this.dashboardCharts = [];
-            this.updateCanvasInfo();
+        if (this.selectedWidget) {
+            this.deleteWidget(this.selectedWidget);
         }
     }
 
@@ -669,23 +625,16 @@ class DashboardEditor {
         
         // Update mode buttons
         document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.mode === mode);
+            btn.classList.remove('active');
         });
-
+        document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+        
         // Update canvas based on mode
-        const canvas = document.getElementById('dashboardCanvas');
+        const canvas = document.getElementById('canvasGrid');
         if (mode === 'preview') {
             canvas.classList.add('preview-mode');
-            // Hide edit controls
-            document.querySelectorAll('.chart-widget-actions, .chart-widget-resize').forEach(el => {
-                el.style.display = 'none';
-            });
         } else {
             canvas.classList.remove('preview-mode');
-            // Show edit controls
-            document.querySelectorAll('.chart-widget-actions, .chart-widget-resize').forEach(el => {
-                el.style.display = '';
-            });
         }
     }
 
@@ -694,132 +643,78 @@ class DashboardEditor {
         
         // Update column buttons
         document.querySelectorAll('.column-btn').forEach(btn => {
-            btn.classList.toggle('active', parseInt(btn.dataset.columns) === columns);
+            btn.classList.remove('active');
         });
-
-        // Update grid
-        const grid = document.getElementById('canvasGrid');
-        grid.className = `canvas-grid columns-${columns}`;
+        document.querySelector(`[data-columns="${columns}"]`).classList.add('active');
+        
+        // Update canvas grid
+        const canvas = document.getElementById('canvasGrid');
+        canvas.className = `canvas-grid columns-${columns}`;
     }
 
     setSpacing(spacing) {
         this.currentSpacing = spacing;
-        
-        // Update slider value display
-        document.querySelector('#spacingSlider + .slider-value').textContent = spacing + 'px';
-        
-        // Update grid gap
-        const grid = document.getElementById('canvasGrid');
-        grid.style.gap = spacing + 'px';
+        const canvas = document.getElementById('canvasGrid');
+        canvas.style.gap = `${spacing}px`;
     }
 
     setTheme(theme) {
         this.currentTheme = theme;
-        
         const editor = document.querySelector('.dashboard-editor');
-        editor.classList.toggle('dark-mode', theme === 'dark');
         
-        // Re-render all charts with new theme
-        this.rerenderAllCharts();
+        if (theme === 'dark') {
+            editor.classList.add('dark-mode');
+        } else {
+            editor.classList.remove('dark-mode');
+        }
     }
 
     setNumberFormat(format) {
         this.currentNumberFormat = format;
-        this.rerenderAllCharts();
+        // Update number formatting in charts
+        console.log('Number format changed to:', format);
     }
 
     setFontSize(size) {
         this.currentFontSize = size;
-        
-        // Update slider value display
-        document.querySelector('#fontSizeSlider + .slider-value').textContent = size + 'px';
-        
-        // Update all widgets
-        document.querySelectorAll('.chart-widget, .text-widget').forEach(widget => {
-            widget.style.fontSize = size + 'px';
-        });
-        
-        this.rerenderAllCharts();
-    }
-
-    rerenderAllCharts() {
-        this.dashboardCharts.forEach(dashboardChart => {
-            const widget = dashboardChart.element;
-            const chart = dashboardChart.chart;
-            this.renderChartInWidget(widget, chart);
-        });
+        document.documentElement.style.setProperty('--base-font-size', `${size}px`);
     }
 
     toggleFilters() {
-        const panel = document.getElementById('filtersPanel');
-        const button = document.getElementById('toggleFilters');
-        
-        if (panel.style.display === 'none') {
-            panel.style.display = 'flex';
-            button.textContent = 'Hide';
-        } else {
-            panel.style.display = 'none';
-            button.textContent = 'Show';
+        const filtersPanel = document.getElementById('filtersPanel');
+        if (filtersPanel) {
+            filtersPanel.style.display = filtersPanel.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    clearCanvas() {
+        if (confirm('Are you sure you want to clear all widgets from the canvas?')) {
+            const canvas = document.getElementById('canvasGrid');
+            canvas.innerHTML = '';
+            this.dashboardCharts = [];
+            this.updateCanvasInfo();
         }
     }
 
     updateCanvasInfo() {
-        const count = this.dashboardCharts.length;
-        document.getElementById('canvasInfo').textContent = `${count} chart${count !== 1 ? 's' : ''} on canvas`;
+        const info = document.getElementById('canvasInfo');
+        if (info) {
+            info.textContent = `${this.dashboardCharts.length} widgets on canvas`;
+        }
     }
 
     goToPreviousStep() {
+        // Go back to Step 3
         window.location.href = 'step3.html';
     }
 
     goToNextStep() {
-        // Store dashboard configuration
-        const dashboardConfig = {
-            charts: this.dashboardCharts.map(dc => ({
-                id: dc.id,
-                chartId: dc.chartId,
-                position: this.getWidgetPosition(dc.element),
-                properties: this.getWidgetProperties(dc.element)
-            })),
-            layout: {
-                columns: this.currentColumns,
-                spacing: this.currentSpacing,
-                theme: this.currentTheme,
-                numberFormat: this.currentNumberFormat,
-                fontSize: this.currentFontSize
-            },
-            filters: this.filters
-        };
-
-        localStorage.setItem('dashboardConfig', JSON.stringify(dashboardConfig));
-        
-        alert('Dashboard layout saved! This would proceed to Export & Publish in the full application.');
-        // window.location.href = 'step5.html';
-    }
-
-    getWidgetPosition(widget) {
-        const rect = widget.getBoundingClientRect();
-        const grid = document.getElementById('canvasGrid');
-        const gridRect = grid.getBoundingClientRect();
-        
-        return {
-            x: rect.left - gridRect.left,
-            y: rect.top - gridRect.top,
-            width: rect.width,
-            height: rect.height
-        };
-    }
-
-    getWidgetProperties(widget) {
-        return {
-            backgroundColor: widget.style.backgroundColor || '#ffffff',
-            borderColor: widget.style.borderColor || '#e5e7eb',
-            padding: widget.style.padding || '16px',
-            fontSize: widget.style.fontSize || '14px'
-        };
+        // This would be "Export & Publish" in the full application
+        alert('Export & Publish functionality would be implemented here in the full application.');
     }
 
     showError(message) {
+        // Create a more user-friendly error message
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.style.cssText = `
@@ -839,7 +734,7 @@ class DashboardEditor {
         
         errorDiv.innerHTML = `
             <div style="color: #ef4444; font-size: 1.5rem; margin-bottom: 1rem;">⚠️</div>
-            <h3 style="color: #1f2937; margin-bottom: 1rem;">Dashboard Loading Issue</h3>
+            <h3 style="color: #1f2937; margin-bottom: 1rem;">Data Loading Issue</h3>
             <p style="color: #6b7280; margin-bottom: 1.5rem;">${message}</p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button onclick="window.location.href='step3.html'" style="
@@ -850,7 +745,7 @@ class DashboardEditor {
                     border-radius: 6px;
                     cursor: pointer;
                     font-weight: 500;
-                ">Go to Chart Generator</button>
+                ">Go to Chart Creation</button>
                 <button onclick="this.parentElement.parentElement.remove()" style="
                     background: #f3f4f6;
                     color: #374151;
@@ -865,6 +760,7 @@ class DashboardEditor {
         
         document.body.appendChild(errorDiv);
         
+        // Auto-remove after 10 seconds
         setTimeout(() => {
             if (errorDiv.parentElement) {
                 errorDiv.remove();
@@ -875,5 +771,5 @@ class DashboardEditor {
 
 // Initialize the dashboard editor when the page loads
 document.addEventListener('DOMContentLoaded', function() {
-    new DashboardEditor();
+    window.dashboardEditor = new DashboardEditor();
 });

@@ -19,6 +19,7 @@ const saveRename = document.getElementById('saveRename');
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
+    initializeNavigation();
 });
 
 function initializeEventListeners() {
@@ -48,322 +49,427 @@ function initializeEventListeners() {
     
     // Edit columns button
     document.getElementById('editColumnsBtn').addEventListener('click', openColumnModal);
+    
+    // Click outside modal to close
+    window.addEventListener('click', (e) => {
+        if (e.target === columnModal) {
+            closeModal();
+        }
+    });
+}
+
+function initializeNavigation() {
+    // Make Dataize title clickable to go home
+    const appTitle = document.querySelector('.app-title');
+    if (appTitle) {
+        appTitle.style.cursor = 'pointer';
+        appTitle.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+    }
+    
+    // Make step buttons clickable
+    const stepButtons = document.querySelectorAll('.step[data-step]');
+    stepButtons.forEach(step => {
+        step.addEventListener('click', (e) => {
+            const stepNumber = parseInt(step.dataset.step);
+            navigateToStep(stepNumber);
+        });
+    });
+}
+
+function navigateToStep(stepNumber) {
+    switch(stepNumber) {
+        case 1:
+            // Already on step 1
+            break;
+        case 2:
+            if (currentData) {
+                // Store data and navigate to step 2
+                localStorage.setItem('dashboardData', JSON.stringify(currentData));
+                localStorage.setItem('columnTypes', JSON.stringify(columnTypes));
+                window.location.href = 'step2.html';
+            } else {
+                alert('Please upload a CSV file first before proceeding to Step 2.');
+            }
+            break;
+        case 3:
+            if (currentData) {
+                // Store data and navigate to step 3
+                localStorage.setItem('dashboardData', JSON.stringify(currentData));
+                localStorage.setItem('columnTypes', JSON.stringify(columnTypes));
+                window.location.href = 'step3.html';
+            } else {
+                alert('Please upload a CSV file first before proceeding to Step 3.');
+            }
+            break;
+        case 4:
+            if (currentData) {
+                // Store data and navigate to step 4
+                localStorage.setItem('dashboardData', JSON.stringify(currentData));
+                localStorage.setItem('columnTypes', JSON.stringify(columnTypes));
+                window.location.href = 'step4.html';
+            } else {
+                alert('Please upload a CSV file first before proceeding to Step 4.');
+            }
+            break;
+    }
 }
 
 function handleDragOver(e) {
     e.preventDefault();
-    uploadArea.classList.add('dragover');
+    uploadArea.classList.add('drag-over');
 }
 
 function handleDragLeave(e) {
     e.preventDefault();
-    uploadArea.classList.remove('dragover');
+    uploadArea.classList.remove('drag-over');
 }
 
 function handleDrop(e) {
     e.preventDefault();
-    uploadArea.classList.remove('dragover');
+    uploadArea.classList.remove('drag-over');
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-        processFile(files[0]);
+        handleFile(files[0]);
     }
 }
 
 function handleFileSelect(e) {
     const file = e.target.files[0];
     if (file) {
-        processFile(file);
+        handleFile(file);
     }
 }
 
-function processFile(file) {
+function handleFile(file) {
     if (!file.name.toLowerCase().endsWith('.csv')) {
         alert('Please select a CSV file.');
         return;
     }
     
-    // Show loading state
-    uploadButton.innerHTML = '<div class="loading"></div> Processing...';
-    uploadButton.disabled = true;
-    
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const csv = e.target.result;
-            const data = parseCSV(csv);
+            const lines = csv.split('\n').filter(line => line.trim());
             
-            if (data.length === 0) {
-                alert('The CSV file appears to be empty.');
-                resetUploadState();
+            if (lines.length < 2) {
+                alert('CSV file must have at least a header row and one data row.');
                 return;
             }
             
+            // Parse CSV
+            const headers = parseCSVLine(lines[0]);
+            const data = [];
+            
+            for (let i = 1; i < Math.min(lines.length, 11); i++) { // Limit to first 10 rows for preview
+                const values = parseCSVLine(lines[i]);
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index];
+                    });
+                    data.push(row);
+                }
+            }
+            
+            // Store original data
             currentData = data;
-            detectColumnTypes();
-            displayDataPreview(file.name);
-            showConfirmationSection();
-            enableNextStep();
+            originalColumnNames = {...headers};
+            
+            // Detect column types
+            columnTypes = detectColumnTypes(data, headers);
+            
+            // Show preview
+            showPreview(data, headers);
             
         } catch (error) {
-            console.error('Error processing CSV:', error);
-            alert('Error processing CSV file. Please check the file format.');
-            resetUploadState();
+            console.error('Error parsing CSV:', error);
+            alert('Error parsing CSV file. Please check the file format.');
         }
     };
     
     reader.readAsText(file);
 }
 
-function parseCSV(csv) {
-    const lines = csv.split('\n').filter(line => line.trim() !== '');
-    if (lines.length === 0) return [];
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
     
-    const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
-    const data = [];
-    
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(value => value.trim().replace(/"/g, ''));
-        if (values.length === headers.length) {
-            const row = {};
-            headers.forEach((header, index) => {
-                row[header] = values[index];
-            });
-            data.push(row);
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
         }
     }
     
-    return data;
+    result.push(current.trim());
+    return result;
 }
 
-function detectColumnTypes() {
-    if (!currentData || currentData.length === 0) return;
-    
-    const headers = Object.keys(currentData[0]);
-    columnTypes = {};
+function detectColumnTypes(data, headers) {
+    const types = {};
     
     headers.forEach(header => {
-        const values = currentData.slice(0, 10).map(row => row[header]).filter(val => val !== '');
+        const values = data.map(row => row[header]).filter(val => val !== '');
         
         if (values.length === 0) {
-            columnTypes[header] = 'string';
+            types[header] = 'string';
             return;
         }
         
-        // Check for boolean
-        const booleanValues = values.map(val => val.toLowerCase());
-        if (booleanValues.every(val => ['true', 'false', 'yes', 'no', '1', '0', 'y', 'n'].includes(val))) {
-            columnTypes[header] = 'boolean';
+        // Check if all values are numbers
+        const allNumbers = values.every(val => !isNaN(parseFloat(val)) && isFinite(val));
+        if (allNumbers) {
+            types[header] = 'number';
             return;
         }
         
-        // Check for date
-        const dateValues = values.filter(val => {
-            const date = new Date(val);
-            return !isNaN(date.getTime()) && val.match(/\d{1,4}[-\/]\d{1,2}[-\/]\d{1,4}/);
-        });
-        if (dateValues.length > values.length * 0.7) {
-            columnTypes[header] = 'date';
+        // Check if all values are dates
+        const allDates = values.every(val => !isNaN(Date.parse(val)));
+        if (allDates) {
+            types[header] = 'date';
             return;
         }
         
-        // Check for number
-        const numberValues = values.filter(val => !isNaN(parseFloat(val)) && isFinite(val));
-        if (numberValues.length > values.length * 0.7) {
-            columnTypes[header] = 'number';
+        // Check if all values are booleans
+        const allBooleans = values.every(val => 
+            val.toLowerCase() === 'true' || 
+            val.toLowerCase() === 'false' ||
+            val.toLowerCase() === 'yes' ||
+            val.toLowerCase() === 'no'
+        );
+        if (allBooleans) {
+            types[header] = 'boolean';
             return;
         }
         
         // Default to string
-        columnTypes[header] = 'string';
+        types[header] = 'string';
     });
+    
+    return types;
 }
 
-function displayDataPreview(fileName) {
-    const headers = Object.keys(currentData[0]);
-    const previewData = currentData.slice(0, 10);
+function showPreview(data, headers) {
+    // Create preview table
+    const previewTable = document.createElement('table');
+    previewTable.className = 'preview-table';
     
-    // Update file info
-    document.getElementById('fileName').textContent = fileName;
-    document.getElementById('rowCount').textContent = `${currentData.length} rows`;
-    
-    // Create column list
-    const columnList = document.getElementById('columnList');
-    columnList.innerHTML = '';
-    
-    headers.forEach(header => {
-        const columnItem = document.createElement('div');
-        columnItem.className = 'column-item';
-        columnItem.innerHTML = `
-            <span class="column-name">${header}</span>
-            <span class="column-type ${columnTypes[header]}">${columnTypes[header]}</span>
-        `;
-        columnList.appendChild(columnItem);
-    });
-    
-    // Create table
-    const tableHead = document.getElementById('tableHead');
-    const tableBody = document.getElementById('tableBody');
-    
-    tableHead.innerHTML = '';
-    tableBody.innerHTML = '';
-    
-    // Create header row
+    // Header row
     const headerRow = document.createElement('tr');
     headers.forEach(header => {
         const th = document.createElement('th');
         th.textContent = header;
+        th.className = 'column-header';
+        th.innerHTML = `
+            <div class="header-content">
+                <span class="header-name">${header}</span>
+                <span class="header-type">${columnTypes[header]}</span>
+            </div>
+        `;
         headerRow.appendChild(th);
     });
-    tableHead.appendChild(headerRow);
+    previewTable.appendChild(headerRow);
     
-    // Create data rows
-    previewData.forEach(row => {
+    // Data rows
+    data.forEach(row => {
         const tr = document.createElement('tr');
         headers.forEach(header => {
             const td = document.createElement('td');
             td.textContent = row[header] || '';
+            td.className = `data-cell ${columnTypes[header]}`;
             tr.appendChild(td);
         });
-        tableBody.appendChild(tr);
+        previewTable.appendChild(tr);
     });
     
-    // Show preview section
-    previewSection.style.display = 'block';
+    // Update preview section
+    const previewContainer = document.getElementById('previewContainer');
+    previewContainer.innerHTML = '';
+    previewContainer.appendChild(previewTable);
     
-    // Store original column names
-    originalColumnNames = { ...headers.reduce((acc, header) => ({ ...acc, [header]: header }), {}) };
-}
-
-function showConfirmationSection() {
+    // Show preview and confirmation sections
+    previewSection.style.display = 'block';
     confirmationSection.style.display = 'block';
+    
+    // Update data summary
+    updateDataSummary(data.length, headers.length);
 }
 
-function enableNextStep() {
-    nextBtn.disabled = false;
-    nextBtn.innerHTML = `
-        Next Step
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-    `;
+function updateDataSummary(rowCount, columnCount) {
+    document.getElementById('rowCount').textContent = rowCount.toLocaleString();
+    document.getElementById('columnCount').textContent = columnCount;
 }
 
-function resetUploadState() {
-    uploadButton.innerHTML = 'Choose File';
-    uploadButton.disabled = false;
-    previewSection.style.display = 'none';
-    confirmationSection.style.display = 'none';
-    nextBtn.disabled = true;
-    currentData = null;
-    columnTypes = {};
-    originalColumnNames = {};
+function handleNextStep() {
+    if (!currentData) return;
+
+    // Store data in localStorage for next step
+    localStorage.setItem('dashboardData', JSON.stringify(currentData));
+    localStorage.setItem('columnTypes', JSON.stringify(columnTypes));
+
+    // Navigate to Step 2: Data Cleaning
+    window.location.href = 'step2.html';
+}
+
+function handlePreviousStep() {
+    // Step 1 is the first step, so this is disabled
+    console.log('Already at Step 1');
 }
 
 function openColumnModal() {
-    const columnEditList = document.getElementById('columnEditList');
-    columnEditList.innerHTML = '';
-    
-    const headers = Object.keys(currentData[0]);
-    headers.forEach(header => {
-        const editItem = document.createElement('div');
-        editItem.className = 'column-edit-item';
-        editItem.innerHTML = `
-            <input type="text" class="column-edit-name" value="${header}" data-original="${header}">
-            <span class="column-edit-type ${columnTypes[header]}">${columnTypes[header]}</span>
-        `;
-        columnEditList.appendChild(editItem);
-    });
-    
     columnModal.style.display = 'flex';
+    populateColumnModal();
 }
 
 function closeModal() {
     columnModal.style.display = 'none';
 }
 
+function populateColumnModal() {
+    const container = document.getElementById('columnList');
+    container.innerHTML = '';
+    
+    Object.keys(originalColumnNames).forEach(header => {
+        const div = document.createElement('div');
+        div.className = 'column-item';
+        div.innerHTML = `
+            <label for="col_${header}">${header}</label>
+            <input type="text" id="col_${header}" value="${header}" class="column-input">
+        `;
+        container.appendChild(div);
+    });
+}
+
 function saveColumnRenames() {
-    const nameInputs = document.querySelectorAll('.column-edit-name');
-    const newColumnNames = {};
-    const renamedData = [];
+    const inputs = document.querySelectorAll('.column-input');
+    const newHeaders = [];
     
-    // Collect new column names
-    nameInputs.forEach(input => {
-        const originalName = input.dataset.original;
-        const newName = input.value.trim();
-        newColumnNames[originalName] = newName;
+    inputs.forEach(input => {
+        newHeaders.push(input.value.trim() || input.id.replace('col_', ''));
     });
     
-    // Check for duplicate names
-    const names = Object.values(newColumnNames);
-    const duplicates = names.filter((name, index) => names.indexOf(name) !== index);
-    if (duplicates.length > 0) {
-        alert('Column names must be unique. Please fix duplicates.');
-        return;
-    }
-    
-    // Rename columns in data
-    currentData.forEach(row => {
+    // Update column names in data
+    const newData = currentData.map(row => {
         const newRow = {};
-        Object.keys(row).forEach(oldName => {
-            const newName = newColumnNames[oldName];
-            newRow[newName] = row[oldName];
+        Object.keys(row).forEach((oldHeader, index) => {
+            newRow[newHeaders[index]] = row[oldHeader];
         });
-        renamedData.push(newRow);
+        return newRow;
     });
     
-    currentData = renamedData;
-    
-    // Update column types mapping
+    // Update column types
     const newColumnTypes = {};
-    Object.keys(columnTypes).forEach(oldName => {
-        const newName = newColumnNames[oldName];
-        newColumnTypes[newName] = columnTypes[oldName];
+    Object.keys(columnTypes).forEach((oldHeader, index) => {
+        newColumnTypes[newHeaders[index]] = columnTypes[oldHeader];
     });
+    
+    // Update global state
+    currentData = newData;
     columnTypes = newColumnTypes;
     
-    // Update display
-    displayDataPreview(document.getElementById('fileName').textContent);
+    // Refresh preview
+    showPreview(currentData, newHeaders);
     
     closeModal();
 }
 
-function handleNextStep() {
-    if (!currentData) return;
-    
-    // Store data in localStorage for next step
-    localStorage.setItem('dashboardData', JSON.stringify(currentData));
-    localStorage.setItem('columnTypes', JSON.stringify(columnTypes));
-    
-    // Navigate to Step 2: Data Cleaning
-    window.location.href = 'step2.html';
-}
-
-function handlePreviousStep() {
-    // This is Step 1, so previous is disabled
-    // In a real application, you might navigate back to a welcome screen
-    console.log('Previous step clicked (disabled for Step 1)');
-}
-
-// Utility function to format data for display
-function formatValue(value, type) {
-    if (value === '' || value === null || value === undefined) return '';
-    
-    switch (type) {
-        case 'number':
-            return parseFloat(value).toLocaleString();
-        case 'date':
-            return new Date(value).toLocaleDateString();
-        case 'boolean':
-            return value.toLowerCase() === 'true' || value === '1' || value.toLowerCase() === 'yes' ? 'Yes' : 'No';
-        default:
-            return value;
+// Add some basic styling for the preview table
+const style = document.createElement('style');
+style.textContent = `
+    .preview-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.875rem;
     }
-}
-
-// Export functions for potential use in other steps
-window.dashboardApp = {
-    getCurrentData: () => currentData,
-    getColumnTypes: () => columnTypes,
-    resetData: resetUploadState
-};
+    
+    .preview-table th,
+    .preview-table td {
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem;
+        text-align: left;
+    }
+    
+    .preview-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .header-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .header-name {
+        font-weight: 600;
+    }
+    
+    .header-type {
+        font-size: 0.75rem;
+        color: #6b7280;
+        background: #e0e7ff;
+        padding: 0.125rem 0.375rem;
+        border-radius: 4px;
+        width: fit-content;
+    }
+    
+    .data-cell.number {
+        text-align: right;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .data-cell.date {
+        color: #059669;
+    }
+    
+    .data-cell.boolean {
+        color: #dc2626;
+        font-weight: 500;
+    }
+    
+    .column-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .column-item:last-child {
+        border-bottom: none;
+    }
+    
+    .column-item label {
+        font-weight: 500;
+        color: #374151;
+        min-width: 100px;
+    }
+    
+    .column-input {
+        flex: 1;
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+    
+    .column-input:focus {
+        outline: none;
+        border-color: #1aa7ee;
+        box-shadow: 0 0 0 3px rgba(26, 167, 238, 0.1);
+    }
+`;
+document.head.appendChild(style);
