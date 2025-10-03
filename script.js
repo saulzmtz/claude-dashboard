@@ -254,9 +254,23 @@ function detectColumnTypes(data, headers) {
             return;
         }
         
-        // Check if all values are numbers
-        const allNumbers = values.every(val => !isNaN(parseFloat(val)) && isFinite(val));
-        if (allNumbers) {
+        // Check if all values are numbers (including strings that can be parsed as numbers)
+        const allNumbers = values.every(val => {
+            // Remove common currency symbols, commas, and whitespace
+            const cleaned = val.toString().replace(/[$,\s]/g, '');
+            return !isNaN(parseFloat(cleaned)) && isFinite(parseFloat(cleaned)) && cleaned !== '';
+        });
+        
+        // Also check if column name suggests it's numeric (Amount, Price, Cost, etc.)
+        const numericKeywords = ['amount', 'price', 'cost', 'value', 'total', 'sum', 'count', 'quantity', 'number', 'num'];
+        const isNumericColumn = numericKeywords.some(keyword => 
+            header.toLowerCase().includes(keyword)
+        );
+        
+        if (allNumbers || (isNumericColumn && values.some(val => {
+            const cleaned = val.toString().replace(/[$,\s]/g, '');
+            return !isNaN(parseFloat(cleaned)) && isFinite(parseFloat(cleaned)) && cleaned !== '';
+        }))) {
             types[header] = 'number';
             return;
         }
