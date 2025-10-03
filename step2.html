@@ -13,7 +13,6 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <h1 class="app-title">Dataize</h1>
                 <div class="step-indicator">
                     <div class="step" data-step="1">
                         <span class="step-number">1</span>
@@ -32,189 +31,154 @@
                         <span class="step-label">Dashboard</span>
                     </div>
                 </div>
+                <h1 class="app-title">Dataize</h1>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="step-container">
-                <div class="step-header">
-                    <h2 class="step-title">Step 2: Clean Your Data</h2>
-                    <p class="step-description">We'll guide you through cleaning your data step by step. Each operation will be applied to your entire dataset.</p>
-                </div>
-
+            <div class="container">
                 <!-- Data Summary -->
-                <div class="data-summary" id="dataSummary">
-                    <div class="summary-card">
-                        <div class="summary-item">
-                            <span class="summary-label">Total Rows</span>
-                            <span class="summary-value" id="totalRows">-</span>
+                <div class="data-summary-card">
+                    <h2>Data Cleaning</h2>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="totalRows">0</span>
+                            <span class="stat-label">Total Rows</span>
                         </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Columns</span>
-                            <span class="summary-value" id="totalColumns">-</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Data Types</span>
-                            <span class="summary-value" id="dataTypes">-</span>
+                        <div class="stat">
+                            <span class="stat-number" id="totalColumns">0</span>
+                            <span class="stat-label">Total Columns</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="progress-indicator">
+                    <div class="progress-dot active"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
                 </div>
 
                 <!-- Cleaning Steps -->
-                <div class="cleaning-container">
-                    <!-- Step 1: Fix Date Formats -->
-                    <div class="cleaning-step" id="step1" data-step="1">
+                <div class="cleaning-steps">
+                    <!-- Step 1: Date Formats -->
+                    <div class="cleaning-step active" id="cleaningStep1">
                         <div class="step-header">
                             <div class="step-number">1</div>
                             <div class="step-info">
-                                <h3 class="step-title">Fix Inconsistent Date Formats</h3>
-                                <p class="step-description">Detect and normalize date fields to YYYY-MM-DD format</p>
+                                <h3>Fix Inconsistent Date Formats</h3>
+                                <p>Normalize date fields to YYYY-MM-DD format</p>
                             </div>
                         </div>
-                        <div class="step-content">
-                            <div class="detection-results" id="dateDetectionResults"></div>
-                            <div class="preview-section" id="datePreview" style="display: none;">
-                                <h4>Preview Changes</h4>
-                                <div class="preview-table" id="datePreviewTable"></div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="skipDateBtn">Skip This Step</button>
-                                <button class="btn btn-primary" id="applyDateBtn" style="display: none;">Apply Changes</button>
-                            </div>
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="skipDateBtn">Skip This Step</button>
+                            <button class="btn btn-primary" id="applyDateBtn">Apply Date Formatting</button>
                         </div>
                     </div>
 
-                    <!-- Step 2: Remove Whitespace -->
-                    <div class="cleaning-step" id="step2" data-step="2" style="display: none;">
+                    <!-- Step 2: Whitespace -->
+                    <div class="cleaning-step" id="cleaningStep2">
                         <div class="step-header">
                             <div class="step-number">2</div>
                             <div class="step-info">
-                                <h3 class="step-title">Remove Extra Whitespace</h3>
-                                <p class="step-description">Trim leading and trailing whitespace from all text fields</p>
+                                <h3>Remove Extra Whitespace</h3>
+                                <p>Trim leading and trailing whitespace from text fields</p>
                             </div>
                         </div>
-                        <div class="step-content">
-                            <div class="detection-results" id="whitespaceDetectionResults"></div>
-                            <div class="preview-section" id="whitespacePreview" style="display: none;">
-                                <h4>Preview Changes</h4>
-                                <div class="preview-table" id="whitespacePreviewTable"></div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="skipWhitespaceBtn">Skip This Step</button>
-                                <button class="btn btn-primary" id="applyWhitespaceBtn" style="display: none;">Apply Changes</button>
-                            </div>
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="skipWhitespaceBtn">Skip This Step</button>
+                            <button class="btn btn-primary" id="applyWhitespaceBtn">Remove Whitespace</button>
                         </div>
                     </div>
 
-                    <!-- Step 3: Standardize Text Casing -->
-                    <div class="cleaning-step" id="step3" data-step="3" style="display: none;">
+                    <!-- Step 3: Text Casing -->
+                    <div class="cleaning-step" id="cleaningStep3">
                         <div class="step-header">
                             <div class="step-number">3</div>
                             <div class="step-info">
-                                <h3 class="step-title">Standardize Text Casing</h3>
-                                <p class="step-description">Choose text columns and standardize their casing</p>
+                                <h3>Standardize Text Casing</h3>
+                                <p>Choose how to format text in your data</p>
                             </div>
                         </div>
-                        <div class="step-content">
-                            <div class="column-selection">
-                                <h4>Select Text Columns to Standardize</h4>
-                                <div class="column-checkboxes" id="textColumnCheckboxes"></div>
+                        <div class="casing-options">
+                            <div class="option-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="casingType" value="proper">
+                                    <span class="radio-label">Proper Case (John Smith)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="casingType" value="upper">
+                                    <span class="radio-label">UPPER CASE (JOHN SMITH)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="casingType" value="lower">
+                                    <span class="radio-label">lower case (john smith)</span>
+                                </label>
                             </div>
-                            <div class="casing-options" id="casingOptions" style="display: none;">
-                                <h4>Choose Casing Format</h4>
-                                <div class="casing-buttons">
-                                    <button class="btn btn-outline casing-btn" data-casing="proper">Proper Case</button>
-                                    <button class="btn btn-outline casing-btn" data-casing="upper">UPPER CASE</button>
-                                    <button class="btn btn-outline casing-btn" data-casing="lower">lower case</button>
-                                </div>
-                            </div>
-                            <div class="preview-section" id="casingPreview" style="display: none;">
-                                <h4>Preview Changes</h4>
-                                <div class="preview-table" id="casingPreviewTable"></div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="skipCasingBtn">Skip This Step</button>
-                                <button class="btn btn-primary" id="applyCasingBtn" style="display: none;">Apply Changes</button>
-                            </div>
+                            <div class="preview" id="casingPreview">Select a casing option to see preview</div>
+                        </div>
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="skipCasingBtn">Skip This Step</button>
+                            <button class="btn btn-primary" id="applyCasingBtn">Apply Text Casing</button>
                         </div>
                     </div>
 
-                    <!-- Step 4: Format Currency -->
-                    <div class="cleaning-step" id="step4" data-step="4" style="display: none;">
+                    <!-- Step 4: Currency -->
+                    <div class="cleaning-step" id="cleaningStep4">
                         <div class="step-header">
                             <div class="step-number">4</div>
                             <div class="step-info">
-                                <h3 class="step-title">Format Amount as Currency</h3>
-                                <p class="step-description">Detect and format amount columns as USD currency</p>
+                                <h3>Format Amount as Currency</h3>
+                                <p>Clean and format currency values</p>
                             </div>
                         </div>
-                        <div class="step-content">
-                            <div class="detection-results" id="currencyDetectionResults"></div>
-                            <div class="preview-section" id="currencyPreview" style="display: none;">
-                                <h4>Preview Changes</h4>
-                                <div class="preview-table" id="currencyPreviewTable"></div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="skipCurrencyBtn">Skip This Step</button>
-                                <button class="btn btn-primary" id="applyCurrencyBtn" style="display: none;">Apply Changes</button>
-                            </div>
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="skipCurrencyBtn">Skip This Step</button>
+                            <button class="btn btn-primary" id="applyCurrencyBtn">Format Currency</button>
                         </div>
                     </div>
 
-                    <!-- Step 5: Handle Null Values -->
-                    <div class="cleaning-step" id="step5" data-step="5" style="display: none;">
+                    <!-- Step 5: Null Values -->
+                    <div class="cleaning-step" id="cleaningStep5">
                         <div class="step-header">
                             <div class="step-number">5</div>
                             <div class="step-info">
-                                <h3 class="step-title">Handle Null or Blank Values</h3>
-                                <p class="step-description">Identify and handle empty or null values in your data</p>
+                                <h3>Handle Null or Blank Values</h3>
+                                <p>Decide how to handle empty fields</p>
                             </div>
                         </div>
-                        <div class="step-content">
-                            <div class="detection-results" id="nullDetectionResults"></div>
-                            <div class="null-options" id="nullOptions" style="display: none;">
-                                <h4>Choose How to Handle Null Values</h4>
-                                <div class="null-buttons">
-                                    <button class="btn btn-outline null-btn" data-action="fill">Fill with "N/A"</button>
-                                    <button class="btn btn-outline null-btn" data-action="leave">Leave Blank</button>
-                                </div>
+                        <div class="null-options">
+                            <div class="option-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="nullHandling" value="fill">
+                                    <span class="radio-label">Fill with "N/A"</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="nullHandling" value="blank">
+                                    <span class="radio-label">Leave Blank</span>
+                                </label>
                             </div>
-                            <div class="preview-section" id="nullPreview" style="display: none;">
-                                <h4>Preview Changes</h4>
-                                <div class="preview-table" id="nullPreviewTable"></div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="skipNullBtn">Skip This Step</button>
-                                <button class="btn btn-primary" id="applyNullBtn" style="display: none;">Apply Changes</button>
-                            </div>
+                            <div class="preview" id="nullPreview">Select a handling option</div>
                         </div>
-                    </div>
-
-                    <!-- Completion Summary -->
-                    <div class="completion-summary" id="completionSummary" style="display: none;">
-                        <div class="summary-content">
-                            <h3>Data Cleaning Complete!</h3>
-                            <p>Your data has been cleaned and is ready for visualization.</p>
-                            <div class="summary-stats" id="cleaningStats"></div>
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="skipNullBtn">Skip This Step</button>
+                            <button class="btn btn-primary" id="applyNullBtn">Handle Null Values</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- Completion Summary -->
+                <div class="completion-summary" id="completionSummary" style="display: none;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
                 <!-- Navigation -->
-                <div class="navigation">
-                    <button class="btn btn-outline" id="prevBtn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Previous Step
-                    </button>
-                    <button class="btn btn-primary" id="nextBtn" disabled>
-                        Next Step
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
+                <div class="step-navigation">
+                    <button class="btn btn-outline" id="prevBtn">Previous Step</button>
+                    <button class="btn btn-primary" id="nextBtn" disabled>Next Step</button>
                 </div>
             </div>
         </main>

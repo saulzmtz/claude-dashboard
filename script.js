@@ -198,22 +198,39 @@ function parseCSVLine(line) {
     const result = [];
     let current = '';
     let inQuotes = false;
+    let i = 0;
     
-    for (let i = 0; i < line.length; i++) {
+    while (i < line.length) {
         const char = line[i];
         
         if (char === '"') {
-            inQuotes = !inQuotes;
+            if (inQuotes && line[i + 1] === '"') {
+                // Handle escaped quotes
+                current += '"';
+                i += 2;
+                continue;
+            } else {
+                inQuotes = !inQuotes;
+            }
         } else if (char === ',' && !inQuotes) {
             result.push(current.trim());
             current = '';
         } else {
             current += char;
         }
+        i++;
     }
     
+    // Add the last field
     result.push(current.trim());
-    return result;
+    
+    // Remove quotes from the beginning and end of each field if they exist
+    return result.map(field => {
+        if (field.startsWith('"') && field.endsWith('"')) {
+            return field.slice(1, -1);
+        }
+        return field;
+    });
 }
 
 function detectColumnTypes(data, headers) {

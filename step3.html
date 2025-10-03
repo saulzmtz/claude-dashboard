@@ -14,7 +14,6 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <h1 class="app-title">Dataize</h1>
                 <div class="step-indicator">
                     <div class="step" data-step="1">
                         <span class="step-number">1</span>
@@ -33,295 +32,236 @@
                         <span class="step-label">Dashboard</span>
                     </div>
                 </div>
+                <h1 class="app-title">Dataize</h1>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="step-container">
-                <div class="step-header">
-                    <h2 class="step-title">Step 3: Create Visualizations</h2>
-                    <p class="step-description">Build charts and tables from your cleaned data. Create multiple visualizations to add to your dashboard.</p>
-                </div>
-
+            <div class="container">
                 <!-- Data Summary -->
-                <div class="data-summary" id="dataSummary">
-                    <div class="summary-card">
-                        <div class="summary-item">
-                            <span class="summary-label">Total Rows</span>
-                            <span class="summary-value" id="totalRows">-</span>
+                <div class="data-summary-card">
+                    <h2>Create Visualizations</h2>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="totalRows">0</span>
+                            <span class="stat-label">Total Rows</span>
                         </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Columns</span>
-                            <span class="summary-value" id="totalColumns">-</span>
+                        <div class="stat">
+                            <span class="stat-number" id="totalColumns">0</span>
+                            <span class="stat-label">Total Columns</span>
                         </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Charts Created</span>
-                            <span class="summary-value" id="chartsCreated">0</span>
+                        <div class="stat">
+                            <span class="stat-number" id="chartsCreated">0</span>
+                            <span class="stat-label">Charts Created</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chart Creation Interface -->
-                <div class="chart-creation-container">
+                <!-- Chart Creation Steps -->
+                <div class="chart-creation">
                     <!-- Step 1: Select Metric -->
-                    <div class="creation-step" id="step1" data-step="1">
+                    <div class="creation-step active" id="step1">
                         <div class="step-header">
-                            <div class="step-number">1</div>
-                            <div class="step-info">
-                                <h3 class="step-title">Select a Metric (Y-Axis)</h3>
-                                <p class="step-description">Choose what you want to measure or display</p>
-                            </div>
+                            <h3>Step 1: Select a Metric (Y-Axis)</h3>
+                            <p>Choose what you want to measure in your chart</p>
                         </div>
-                        <div class="step-content">
-                            <div class="metric-selection">
-                                <div class="metric-type-tabs">
-                                    <button class="tab-btn active" data-type="field">Data Field</button>
-                                    <button class="tab-btn" data-type="count">Count Records</button>
-                                    <button class="tab-btn" data-type="calculated">Calculated Field</button>
+                        
+                        <div class="metric-tabs">
+                            <button class="tab-btn active" data-type="field">Field Values</button>
+                            <button class="tab-btn" data-type="calculated">Calculated Fields</button>
+                            <button class="tab-btn" data-type="count">Count Records</button>
+                        </div>
+
+                        <div class="metric-options">
+                            <!-- Field Values Option -->
+                            <div class="metric-option active" id="fieldOption">
+                                <h4>Select a Numeric Field</h4>
+                                <div class="field-grid" id="numericFields">
+                                    <!-- Populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- Calculated Fields Option -->
+                            <div class="metric-option" id="calculatedOption">
+                                <h4>Choose a Calculation</h4>
+                                <div class="calculation-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="calculated" value="average">
+                                        <span class="radio-label">Average</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="calculated" value="sum">
+                                        <span class="radio-label">Sum</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="calculated" value="text">
+                                        <span class="radio-label">Most Common Text</span>
+                                    </label>
                                 </div>
                                 
-                                <div class="metric-options" id="metricOptions">
-                                    <!-- Field selection -->
-                                    <div class="metric-option active" id="fieldOption">
-                                        <h4>Select a Numeric Field</h4>
-                                        <div class="field-grid" id="numericFields"></div>
+                                <div class="field-selectors">
+                                    <div class="field-selector">
+                                        <label>Average of:</label>
+                                        <select id="averageField">
+                                            <option value="">Select field...</option>
+                                        </select>
                                     </div>
-                                    
-                                    <!-- Count selection -->
-                                    <div class="metric-option" id="countOption">
-                                        <h4>Count of Records</h4>
-                                        <p>This will count the total number of records in each group</p>
+                                    <div class="field-selector">
+                                        <label>Sum of:</label>
+                                        <select id="sumField">
+                                            <option value="">Select field...</option>
+                                        </select>
                                     </div>
-                                    
-                                    <!-- Calculated field -->
-                                    <div class="metric-option" id="calculatedOption">
-                                        <h4>Calculated Field</h4>
-                                        <div class="calculated-options">
-                                            <div class="calculated-item">
-                                                <label>
-                                                    <input type="radio" name="calculated" value="average">
-                                                    <span>Average of</span>
-                                                </label>
-                                                <select id="averageField" class="field-select">
-                                                    <option value="">Select field...</option>
-                                                </select>
-                                            </div>
-                                            <div class="calculated-item">
-                                                <label>
-                                                    <input type="radio" name="calculated" value="sum">
-                                                    <span>Sum of</span>
-                                                </label>
-                                                <select id="sumField" class="field-select">
-                                                    <option value="">Select field...</option>
-                                                </select>
-                                            </div>
-                                            <div class="calculated-item">
-                                                <label>
-                                                    <input type="radio" name="calculated" value="text">
-                                                    <span>Most common value in</span>
-                                                </label>
-                                                <select id="textField" class="field-select">
-                                                    <option value="">Select field...</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                    <div class="field-selector">
+                                        <label>Most common in:</label>
+                                        <select id="textField">
+                                            <option value="">Select field...</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
-                            <div class="step-actions">
-                                <button class="btn btn-primary" id="nextToStep2" disabled>Next: Select Grouping</button>
+
+                            <!-- Count Records Option -->
+                            <div class="metric-option" id="countOption">
+                                <h4>Count of Records</h4>
+                                <p>This will count the number of records in your dataset</p>
                             </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-primary" id="nextToStep2" disabled>Next: Select Grouping</button>
                         </div>
                     </div>
 
-                    <!-- Step 2: Select Grouping Dimension -->
-                    <div class="creation-step" id="step2" data-step="2" style="display: none;">
+                    <!-- Step 2: Select Grouping -->
+                    <div class="creation-step" id="step2">
                         <div class="step-header">
-                            <div class="step-number">2</div>
-                            <div class="step-info">
-                                <h3 class="step-title">Select Grouping Dimension (X-Axis)</h3>
-                                <p class="step-description">Choose how to group your data</p>
-                            </div>
+                            <h3>Step 2: Select Grouping (X-Axis)</h3>
+                            <p>Choose how to group your data</p>
                         </div>
-                        <div class="step-content">
-                            <div class="grouping-selection">
-                                <h4>Select a Categorical Field</h4>
-                                <div class="field-grid" id="categoricalFields"></div>
-                                
-                                <div class="grouping-options">
-                                    <h4>Grouping Options</h4>
-                                    <div class="option-item">
-                                        <label>
-                                            <input type="checkbox" id="showOthers">
-                                            <span>Include "Others" for small groups</span>
-                                        </label>
-                                    </div>
-                                    <div class="option-item">
-                                        <label>
-                                            <input type="checkbox" id="limitGroups">
-                                            <span>Limit to top</span>
-                                        </label>
-                                        <input type="number" id="groupLimit" value="10" min="1" max="50" class="number-input">
-                                        <span>groups</span>
-                                    </div>
+
+                        <div class="grouping-options">
+                            <h4>Select a Categorical Field</h4>
+                            <div class="field-grid" id="categoricalFields">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                            
+                            <div class="grouping-settings">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="showOthers">
+                                    <span class="checkbox-label">Show "Others" for small groups</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="limitGroups">
+                                    <span class="checkbox-label">Limit number of groups</span>
+                                </label>
+                                <div class="group-limit" id="groupLimitContainer" style="display: none;">
+                                    <label for="groupLimit">Maximum groups:</label>
+                                    <input type="number" id="groupLimit" value="10" min="1" max="50">
                                 </div>
                             </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="backToStep1">Back</button>
-                                <button class="btn btn-primary" id="nextToStep3" disabled>Next: Select Chart Type</button>
-                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="backToStep1">Back: Select Metric</button>
+                            <button class="btn btn-primary" id="nextToStep3" disabled>Next: Choose Chart Type</button>
                         </div>
                     </div>
 
                     <!-- Step 3: Select Chart Type -->
-                    <div class="creation-step" id="step3" data-step="3" style="display: none;">
+                    <div class="creation-step" id="step3">
                         <div class="step-header">
-                            <div class="step-number">3</div>
-                            <div class="step-info">
-                                <h3 class="step-title">Select Chart Type</h3>
-                                <p class="step-description">Choose how to visualize your data</p>
+                            <h3>Step 3: Choose Chart Type</h3>
+                            <p>Select the best visualization for your data</p>
+                        </div>
+
+                        <div class="chart-options">
+                            <div class="chart-option" data-type="bar">
+                                <div class="chart-icon">📊</div>
+                                <h4>Bar Chart</h4>
+                                <p>Compare values across categories</p>
+                            </div>
+                            <div class="chart-option" data-type="line">
+                                <div class="chart-icon">📈</div>
+                                <h4>Line Chart</h4>
+                                <p>Show trends over time</p>
+                            </div>
+                            <div class="chart-option" data-type="pie">
+                                <div class="chart-icon">🥧</div>
+                                <h4>Pie Chart</h4>
+                                <p>Show parts of a whole</p>
+                            </div>
+                            <div class="chart-option" data-type="table">
+                                <div class="chart-icon">📋</div>
+                                <h4>Table</h4>
+                                <p>Display data in rows and columns</p>
+                            </div>
+                            <div class="chart-option" data-type="kpi">
+                                <div class="chart-icon">📊</div>
+                                <h4>KPI Card</h4>
+                                <p>Show key metrics at a glance</p>
                             </div>
                         </div>
-                        <div class="step-content">
-                            <div class="chart-type-selection">
-                                <div class="chart-grid">
-                                    <div class="chart-option" data-type="bar">
-                                        <div class="chart-icon">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M3 3V21H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M9 9V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M13 5V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M17 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </div>
-                                        <h4>Bar Chart</h4>
-                                        <p>Compare values across categories</p>
-                                    </div>
-                                    
-                                    <div class="chart-option" data-type="line">
-                                        <div class="chart-icon">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M3 3L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M21 3L3 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                                            </svg>
-                                        </div>
-                                        <h4>Line Chart</h4>
-                                        <p>Show trends over time or categories</p>
-                                    </div>
-                                    
-                                    <div class="chart-option" data-type="pie">
-                                        <div class="chart-icon">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M22 12A10 10 0 0 0 12 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </div>
-                                        <h4>Pie Chart</h4>
-                                        <p>Show parts of a whole</p>
-                                    </div>
-                                    
-                                    <div class="chart-option" data-type="table">
-                                        <div class="chart-icon">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M9 3H5A2 2 0 0 0 3 5V19A2 2 0 0 0 5 21H19A2 2 0 0 0 21 19V5A2 2 0 0 0 19 3H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M9 3V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M3 9H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </div>
-                                        <h4>Table</h4>
-                                        <p>Display data in rows and columns</p>
-                                    </div>
-                                    
-                                    <div class="chart-option" data-type="kpi">
-                                        <div class="chart-icon">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M9 9H15V15H9V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </div>
-                                        <h4>KPI Card</h4>
-                                        <p>Display key metrics as cards</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="backToStep2">Back</button>
-                                <button class="btn btn-primary" id="nextToStep4" disabled>Next: Preview & Save</button>
-                            </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="backToStep2">Back: Select Grouping</button>
+                            <button class="btn btn-primary" id="nextToStep4" disabled>Next: Preview & Save</button>
                         </div>
                     </div>
 
-                    <!-- Step 4: Preview and Confirm -->
-                    <div class="creation-step" id="step4" data-step="4" style="display: none;">
+                    <!-- Step 4: Preview & Save -->
+                    <div class="creation-step" id="step4">
                         <div class="step-header">
-                            <div class="step-number">4</div>
-                            <div class="step-info">
-                                <h3 class="step-title">Preview & Save Chart</h3>
-                                <p class="step-description">Review your visualization and add it to your library</p>
+                            <h3>Step 4: Preview & Save</h3>
+                            <p>Review your chart and add it to your library</p>
+                        </div>
+
+                        <div class="preview-section">
+                            <div class="chart-preview" id="chartPreview">
+                                <!-- Chart will be rendered here -->
+                            </div>
+                            
+                            <div class="chart-settings">
+                                <div class="setting-group">
+                                    <label for="chartTitle">Chart Title:</label>
+                                    <input type="text" id="chartTitle" placeholder="Enter chart title...">
+                                </div>
+                            </div>
+                            
+                            <div class="chart-summary" id="chartSummary">
+                                <!-- Chart summary will be populated here -->
                             </div>
                         </div>
-                        <div class="step-content">
-                            <div class="preview-section">
-                                <div class="chart-title-editor">
-                                    <label for="chartTitle">Chart Title</label>
-                                    <input type="text" id="chartTitle" placeholder="Enter chart title..." class="title-input">
-                                </div>
-                                
-                                <div class="chart-preview-container">
-                                    <div class="chart-preview" id="chartPreview">
-                                        <div class="preview-placeholder">
-                                            <div class="loading-spinner"></div>
-                                            <p>Generating preview...</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="chart-summary" id="chartSummary"></div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" id="backToStep3">Back</button>
-                                <button class="btn btn-primary" id="saveChart">Save to Library</button>
-                            </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-outline" id="backToStep3">Back: Choose Chart Type</button>
+                            <button class="btn btn-primary" id="saveChart">Save to Library</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Create Another Chart -->
+                <div class="create-another" id="createAnother" style="display: none;">
+                    <div class="create-another-content">
+                        <h3>Chart Saved Successfully!</h3>
+                        <p>Your chart has been added to the visual library.</p>
+                        <button class="btn btn-outline" id="createNewChart">Create Another Chart</button>
                     </div>
                 </div>
 
                 <!-- Visual Library -->
                 <div class="visual-library" id="visualLibrary" style="display: none;">
-                    <div class="library-header">
-                        <h3>Your Visual Library</h3>
-                        <p>Charts saved for your dashboard</p>
+                    <h3>Your Visual Library</h3>
+                    <div class="library-grid" id="libraryGrid">
+                        <!-- Charts will be displayed here -->
                     </div>
-                    <div class="library-grid" id="libraryGrid"></div>
-                </div>
-
-                <!-- Create Another Chart -->
-                <div class="create-another" id="createAnother" style="display: none;">
-                    <button class="btn btn-outline" id="createNewChart">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Create Another Chart
-                    </button>
                 </div>
 
                 <!-- Navigation -->
-                <div class="navigation">
-                    <button class="btn btn-outline" id="prevBtn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Previous Step
-                    </button>
-                    <button class="btn btn-primary" id="nextBtn" disabled>
-                        Next Step
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
+                <div class="step-navigation">
+                    <button class="btn btn-outline" id="prevBtn">Previous Step</button>
+                    <button class="btn btn-primary" id="nextBtn" disabled>Next Step</button>
                 </div>
             </div>
         </main>
