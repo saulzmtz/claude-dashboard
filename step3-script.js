@@ -698,8 +698,8 @@ class ChartGenerator {
             // Store visual library for next step
             localStorage.setItem('visualLibrary', JSON.stringify(this.visualLibrary));
             
-            alert('Charts created successfully! This would proceed to Step 4: Dashboard Layout in the full application.');
-            // window.location.href = 'step4.html';
+            // Navigate to Step 4: Dashboard Layout Editor
+            window.location.href = 'step4.html';
         }
     }
 

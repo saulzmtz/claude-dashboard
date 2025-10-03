@@ -24,8 +24,10 @@ class DashboardEditor {
 
     initializeEventListeners() {
         // Navigation
-        document.getElementById('prevBtn').addEventListener('click', () => this.goToPreviousStep());
-        document.getElementById('nextBtn').addEventListener('click', () => this.goToNextStep());
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        if (prevBtn) prevBtn.addEventListener('click', () => this.goToPreviousStep());
+        if (nextBtn) nextBtn.addEventListener('click', () => this.goToNextStep());
 
         // Mode toggle
         document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -37,34 +39,52 @@ class DashboardEditor {
             btn.addEventListener('click', (e) => this.setColumns(parseInt(e.target.dataset.columns)));
         });
 
-        document.getElementById('spacingSlider').addEventListener('input', (e) => {
-            this.setSpacing(parseInt(e.target.value));
-        });
+        const spacingSlider = document.getElementById('spacingSlider');
+        if (spacingSlider) {
+            spacingSlider.addEventListener('input', (e) => {
+                this.setSpacing(parseInt(e.target.value));
+            });
+        }
 
         // Design tools
-        document.getElementById('themeSelect').addEventListener('change', (e) => {
-            this.setTheme(e.target.value);
-        });
+        const themeSelect = document.getElementById('themeSelect');
+        if (themeSelect) {
+            themeSelect.addEventListener('change', (e) => {
+                this.setTheme(e.target.value);
+            });
+        }
 
-        document.getElementById('numberFormat').addEventListener('change', (e) => {
-            this.setNumberFormat(e.target.value);
-        });
+        const numberFormat = document.getElementById('numberFormat');
+        if (numberFormat) {
+            numberFormat.addEventListener('change', (e) => {
+                this.setNumberFormat(e.target.value);
+            });
+        }
 
-        document.getElementById('fontSizeSlider').addEventListener('input', (e) => {
-            this.setFontSize(parseInt(e.target.value));
-        });
+        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        if (fontSizeSlider) {
+            fontSizeSlider.addEventListener('input', (e) => {
+                this.setFontSize(parseInt(e.target.value));
+            });
+        }
 
         // Canvas tools
-        document.getElementById('addTextBtn').addEventListener('click', () => this.addTextWidget());
-        document.getElementById('clearCanvasBtn').addEventListener('click', () => this.clearCanvas());
+        const addTextBtn = document.getElementById('addTextBtn');
+        const clearCanvasBtn = document.getElementById('clearCanvasBtn');
+        if (addTextBtn) addTextBtn.addEventListener('click', () => this.addTextWidget());
+        if (clearCanvasBtn) clearCanvasBtn.addEventListener('click', () => this.clearCanvas());
 
         // Properties panel
-        document.getElementById('closeProperties').addEventListener('click', () => this.closePropertiesPanel());
-        document.getElementById('applyProperties').addEventListener('click', () => this.applyProperties());
-        document.getElementById('deleteChart').addEventListener('click', () => this.deleteSelectedWidget());
+        const closeProperties = document.getElementById('closeProperties');
+        const applyProperties = document.getElementById('applyProperties');
+        const deleteChart = document.getElementById('deleteChart');
+        if (closeProperties) closeProperties.addEventListener('click', () => this.closePropertiesPanel());
+        if (applyProperties) applyProperties.addEventListener('click', () => this.applyProperties());
+        if (deleteChart) deleteChart.addEventListener('click', () => this.deleteSelectedWidget());
 
         // Filters
-        document.getElementById('toggleFilters').addEventListener('click', () => this.toggleFilters());
+        const toggleFilters = document.getElementById('toggleFilters');
+        if (toggleFilters) toggleFilters.addEventListener('click', () => this.toggleFilters());
         this.initializeFilterListeners();
 
         // Canvas interactions
@@ -73,18 +93,47 @@ class DashboardEditor {
 
     loadDataFromStep3() {
         try {
-            const storedLibrary = localStorage.getItem('visualLibrary');
-            const storedData = localStorage.getItem('cleanedData');
-            const storedTypes = localStorage.getItem('columnTypes');
+            // Try multiple sources for visual library
+            let storedLibrary = localStorage.getItem('visualLibrary');
+            let storedData = localStorage.getItem('cleanedData');
+            let storedTypes = localStorage.getItem('columnTypes');
             
-            if (!storedLibrary || !storedData) {
+            // Fallback: check if visual library is stored under dashboardData
+            if (!storedLibrary) {
+                const dashboardData = localStorage.getItem('dashboardData');
+                if (dashboardData) {
+                    const parsed = JSON.parse(dashboardData);
+                    if (parsed.visualLibrary) {
+                        storedLibrary = JSON.stringify(parsed.visualLibrary);
+                        console.log('Found visual library in dashboardData');
+                    }
+                }
+            }
+            
+            // Check for Chart.js availability
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded, charts will show as placeholders');
+            }
+            
+            if (!storedLibrary) {
                 this.showError('No visual library found from Step 3. Please go back and create charts first.');
+                return;
+            }
+
+            if (!storedData) {
+                this.showError('No cleaned data found. Please go back to Step 2 to clean your data first.');
                 return;
             }
 
             this.visualLibrary = JSON.parse(storedLibrary);
             this.cleanedData = JSON.parse(storedData);
             this.columnTypes = JSON.parse(storedTypes || '{}');
+            
+            console.log('Loaded data:', {
+                visualLibraryCount: this.visualLibrary.length,
+                dataRows: this.cleanedData.length,
+                columnTypes: Object.keys(this.columnTypes).length
+            });
             
             this.populateChartLibrary();
             this.populateFilters();
@@ -98,6 +147,11 @@ class DashboardEditor {
 
     populateChartLibrary() {
         const libraryContainer = document.getElementById('chartLibrary');
+        
+        if (!libraryContainer) {
+            console.error('Chart library container not found');
+            return;
+        }
         
         if (this.visualLibrary.length === 0) {
             libraryContainer.innerHTML = `
@@ -119,11 +173,11 @@ class DashboardEditor {
             
             libraryItem.innerHTML = `
                 <div class="library-item-header">
-                    <h4 class="library-item-title">${chart.title}</h4>
-                    <span class="library-item-type">${chart.type}</span>
+                    <h4 class="library-item-title">${chart.title || 'Untitled Chart'}</h4>
+                    <span class="library-item-type">${chart.type || 'unknown'}</span>
                 </div>
                 <div class="library-item-preview">
-                    ${chart.type.toUpperCase()} Chart
+                    ${(chart.type || 'CHART').toUpperCase()} Chart
                 </div>
             `;
             
@@ -195,24 +249,33 @@ class DashboardEditor {
 
     initializeFilterListeners() {
         // Date range filters
-        document.getElementById('startDate').addEventListener('change', (e) => {
-            this.filters.dateRange.start = e.target.value;
-            this.applyFilters();
-        });
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        
+        if (startDate) {
+            startDate.addEventListener('change', (e) => {
+                this.filters.dateRange.start = e.target.value;
+                this.applyFilters();
+            });
+        }
 
-        document.getElementById('endDate').addEventListener('change', (e) => {
-            this.filters.dateRange.end = e.target.value;
-            this.applyFilters();
-        });
+        if (endDate) {
+            endDate.addEventListener('change', (e) => {
+                this.filters.dateRange.end = e.target.value;
+                this.applyFilters();
+            });
+        }
 
         // Checkbox filters
         ['regionFilters', 'peopleFilters', 'companyFilters'].forEach(containerId => {
             const container = document.getElementById(containerId);
-            container.addEventListener('change', (e) => {
-                if (e.target.type === 'checkbox') {
-                    this.updateCheckboxFilters(containerId);
-                }
-            });
+            if (container) {
+                container.addEventListener('change', (e) => {
+                    if (e.target.type === 'checkbox') {
+                        this.updateCheckboxFilters(containerId);
+                    }
+                });
+            }
         });
 
         // Numeric range filter
@@ -280,6 +343,11 @@ class DashboardEditor {
     initializeCanvasListeners() {
         const canvas = document.getElementById('canvasGrid');
         
+        if (!canvas) {
+            console.error('Canvas grid not found');
+            return;
+        }
+        
         // Drag and drop
         canvas.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -295,7 +363,9 @@ class DashboardEditor {
             canvas.classList.remove('drag-over');
             
             const chartId = e.dataTransfer.getData('text/plain');
-            this.addChartToCanvas(chartId);
+            if (chartId) {
+                this.addChartToCanvas(chartId);
+            }
         });
 
         // Widget selection
@@ -376,16 +446,41 @@ class DashboardEditor {
 
     renderChartInWidget(widget, chart) {
         const chartContainer = widget.querySelector('.chart-widget-chart');
+        
+        // Check if Chart.js is available
+        if (typeof Chart === 'undefined') {
+            chartContainer.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #6b7280; text-align: center; padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">${chart.title}</div>
+                    <div style="font-size: 0.875rem;">${chart.type.toUpperCase()} Chart</div>
+                    <div style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.7;">Chart.js not loaded</div>
+                </div>
+            `;
+            return;
+        }
+
         const canvas = document.createElement('canvas');
         chartContainer.innerHTML = '';
         chartContainer.appendChild(canvas);
 
-        const ctx = canvas.getContext('2d');
-        
-        // Apply current theme and formatting
-        const config = this.getChartConfig(chart);
-        
-        new Chart(ctx, config);
+        try {
+            const ctx = canvas.getContext('2d');
+            
+            // Apply current theme and formatting
+            const config = this.getChartConfig(chart);
+            
+            new Chart(ctx, config);
+        } catch (error) {
+            console.error('Error rendering chart:', error);
+            chartContainer.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #ef4444; text-align: center; padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚠️</div>
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Chart Error</div>
+                    <div style="font-size: 0.875rem;">Failed to render chart</div>
+                </div>
+            `;
+        }
     }
 
     getChartConfig(chart) {
