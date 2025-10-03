@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataize - Step 4: Dashboard Layout Editor</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="step4-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">Dataize</h1>
+                <div class="step-indicator">
+                    <div class="step" data-step="1">
+                        <span class="step-number">1</span>
+                        <span class="step-label">Data Upload</span>
+                    </div>
+                    <div class="step" data-step="2">
+                        <span class="step-number">2</span>
+                        <span class="step-label">Data Cleaning</span>
+                    </div>
+                    <div class="step" data-step="3">
+                        <span class="step-number">3</span>
+                        <span class="step-label">Visualization</span>
+                    </div>
+                    <div class="step active" data-step="4">
+                        <span class="step-number">4</span>
+                        <span class="step-label">Dashboard</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="step-container">
+                <div class="step-header">
+                    <h2 class="step-title">Step 4: Dashboard Layout Editor</h2>
+                    <p class="step-description">Arrange your charts and create a professional dashboard layout with filters and customization options.</p>
+                </div>
+
+                <!-- Mode Toggle -->
+                <div class="mode-toggle">
+                    <div class="toggle-buttons">
+                        <button class="mode-btn active" data-mode="design">Design Mode</button>
+                        <button class="mode-btn" data-mode="preview">Preview Mode</button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Editor -->
+                <div class="dashboard-editor">
+                    <!-- Sidebar -->
+                    <div class="editor-sidebar">
+                        <!-- Visual Library -->
+                        <div class="sidebar-section">
+                            <h3 class="sidebar-title">Visual Library</h3>
+                            <div class="chart-library" id="chartLibrary">
+                                <div class="library-placeholder">
+                                    <p>No charts available. Go back to Step 3 to create charts.</p>
+                                    <button class="btn btn-outline" onclick="window.location.href='step3.html'">Create Charts</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Layout Tools -->
+                        <div class="sidebar-section">
+                            <h3 class="sidebar-title">Layout Tools</h3>
+                            <div class="layout-tools">
+                                <div class="tool-group">
+                                    <label>Columns</label>
+                                    <div class="column-selector">
+                                        <button class="column-btn active" data-columns="1">1</button>
+                                        <button class="column-btn" data-columns="2">2</button>
+                                        <button class="column-btn" data-columns="3">3</button>
+                                    </div>
+                                </div>
+                                <div class="tool-group">
+                                    <label>Spacing</label>
+                                    <input type="range" id="spacingSlider" min="0" max="40" value="16" class="slider">
+                                    <span class="slider-value">16px</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filters Panel -->
+                        <div class="sidebar-section">
+                            <h3 class="sidebar-title">
+                                Filters
+                                <button class="toggle-filters" id="toggleFilters">Hide</button>
+                            </h3>
+                            <div class="filters-panel" id="filtersPanel">
+                                <div class="filter-group">
+                                    <label>Date Range</label>
+                                    <div class="date-range-picker">
+                                        <input type="date" id="startDate" class="date-input">
+                                        <span>to</span>
+                                        <input type="date" id="endDate" class="date-input">
+                                    </div>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Regions</label>
+                                    <div class="filter-checkboxes" id="regionFilters"></div>
+                                </div>
+                                <div class="filter-group">
+                                    <label>People</label>
+                                    <div class="filter-checkboxes" id="peopleFilters"></div>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Companies</label>
+                                    <div class="filter-checkboxes" id="companyFilters"></div>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Numeric Range</label>
+                                    <div class="range-filter" id="numericRangeFilter"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Design Tools -->
+                        <div class="sidebar-section">
+                            <h3 class="sidebar-title">Design Tools</h3>
+                            <div class="design-tools">
+                                <div class="tool-group">
+                                    <label>Theme</label>
+                                    <select id="themeSelect" class="select-input">
+                                        <option value="light">Light Mode</option>
+                                        <option value="dark">Dark Mode</option>
+                                    </select>
+                                </div>
+                                <div class="tool-group">
+                                    <label>Number Format</label>
+                                    <select id="numberFormat" class="select-input">
+                                        <option value="plain">Plain Numbers</option>
+                                        <option value="thousands">Thousands (K)</option>
+                                        <option value="millions">Millions (M)</option>
+                                        <option value="percentages">Percentages (%)</option>
+                                        <option value="currency">Currency ($)</option>
+                                    </select>
+                                </div>
+                                <div class="tool-group">
+                                    <label>Font Size</label>
+                                    <input type="range" id="fontSizeSlider" min="12" max="24" value="14" class="slider">
+                                    <span class="slider-value">14px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Canvas -->
+                    <div class="canvas-container">
+                        <div class="canvas-header">
+                            <div class="canvas-tools">
+                                <button class="tool-btn" id="addTextBtn" title="Add Text Box">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4 7V4C4 3.44772 4.44772 3 5 3H19C19.5523 3 20 3.44772 20 4V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M4 7H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M4 7V20C4 20.5523 4.44772 21 5 21H19C19.5523 21 20 20.5523 20 20V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M8 11H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M8 15H12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Add Text
+                                </button>
+                                <button class="tool-btn" id="clearCanvasBtn" title="Clear Canvas">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6M19 6V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Clear
+                                </button>
+                            </div>
+                            <div class="canvas-info">
+                                <span id="canvasInfo">0 charts on canvas</span>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard Canvas -->
+                        <div class="dashboard-canvas" id="dashboardCanvas">
+                            <div class="canvas-grid" id="canvasGrid">
+                                <!-- Charts will be placed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Properties Panel -->
+                <div class="properties-panel" id="propertiesPanel" style="display: none;">
+                    <div class="panel-header">
+                        <h3>Chart Properties</h3>
+                        <button class="close-panel" id="closeProperties">×</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="property-group">
+                            <label>Title</label>
+                            <input type="text" id="chartTitleInput" class="property-input">
+                        </div>
+                        <div class="property-group">
+                            <label>Background Color</label>
+                            <input type="color" id="backgroundColorInput" class="color-input" value="#ffffff">
+                        </div>
+                        <div class="property-group">
+                            <label>Border Color</label>
+                            <input type="color" id="borderColorInput" class="color-input" value="#e5e7eb">
+                        </div>
+                        <div class="property-group">
+                            <label>Padding</label>
+                            <input type="range" id="paddingSlider" min="8" max="32" value="16" class="slider">
+                            <span class="slider-value">16px</span>
+                        </div>
+                        <div class="property-group">
+                            <label>Font Size</label>
+                            <input type="range" id="chartFontSizeSlider" min="10" max="20" value="14" class="slider">
+                            <span class="slider-value">14px</span>
+                        </div>
+                        <div class="property-group">
+                            <button class="btn btn-primary" id="applyProperties">Apply Changes</button>
+                            <button class="btn btn-outline" id="deleteChart">Delete Chart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button class="btn btn-outline" id="prevBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Previous Step
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn">
+                        Export & Publish
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="step4-script.js"></script>
+</body>
+</html>
