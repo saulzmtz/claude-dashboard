@@ -34,20 +34,23 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-direction: row !important;
 }
 
 .app-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: #1aa7ee;
+    order: 2;
 }
 
 .step-indicator {
     display: flex;
     gap: 2rem;
+    order: 1;
 }
 
 .step {
@@ -427,7 +430,7 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     .header-content {
-        flex-direction: row; /* Keep horizontal layout */
+        flex-direction: row !important;
         gap: 1rem;
         padding: 0 1rem;
     }

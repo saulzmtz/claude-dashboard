@@ -163,8 +163,10 @@ function handleFile(file) {
             // Parse CSV
             const headers = parseCSVLine(lines[0]);
             const data = [];
+            const previewData = [];
             
-            for (let i = 1; i < Math.min(lines.length, 11); i++) { // Limit to first 10 rows for preview
+            // Load full dataset for processing
+            for (let i = 1; i < lines.length; i++) {
                 const values = parseCSVLine(lines[i]);
                 if (values.length === headers.length) {
                     const row = {};
@@ -172,18 +174,26 @@ function handleFile(file) {
                         row[header] = values[index];
                     });
                     data.push(row);
+                    
+                    // Also store first 10 rows for preview
+                    if (previewData.length < 10) {
+                        previewData.push(row);
+                    }
                 }
             }
             
             // Store original data
             currentData = data;
-            originalColumnNames = {...headers};
+            originalColumnNames = headers.reduce((acc, header, index) => {
+                acc[index] = header;
+                return acc;
+            }, {});
             
             // Detect column types
             columnTypes = detectColumnTypes(data, headers);
             
             // Show preview
-            showPreview(data, headers);
+            showPreview(previewData, headers);
             
         } catch (error) {
             console.error('Error parsing CSV:', error);
@@ -321,6 +331,9 @@ function showPreview(data, headers) {
     
     // Update data summary
     updateDataSummary(data.length, headers.length);
+    
+    // Enable Next Step button
+    nextBtn.disabled = false;
 }
 
 function updateDataSummary(rowCount, columnCount) {
@@ -357,12 +370,13 @@ function populateColumnModal() {
     const container = document.getElementById('columnList');
     container.innerHTML = '';
     
-    Object.keys(originalColumnNames).forEach(header => {
+    Object.keys(originalColumnNames).forEach(index => {
+        const header = originalColumnNames[index];
         const div = document.createElement('div');
         div.className = 'column-item';
         div.innerHTML = `
-            <label for="col_${header}">${header}</label>
-            <input type="text" id="col_${header}" value="${header}" class="column-input">
+            <label for="col_${index}">${header}</label>
+            <input type="text" id="col_${index}" value="${header}" class="column-input">
         `;
         container.appendChild(div);
     });
@@ -371,7 +385,14 @@ function populateColumnModal() {
 function saveColumnRenames() {
     const inputs = document.querySelectorAll('.column-input');
     const newHeaders = [];
+    const oldHeaders = [];
     
+    // Get the original headers in order
+    Object.keys(originalColumnNames).forEach(index => {
+        oldHeaders.push(originalColumnNames[index]);
+    });
+    
+    // Get the new headers from inputs
     inputs.forEach(input => {
         newHeaders.push(input.value.trim() || input.id.replace('col_', ''));
     });
@@ -379,7 +400,7 @@ function saveColumnRenames() {
     // Update column names in data
     const newData = currentData.map(row => {
         const newRow = {};
-        Object.keys(row).forEach((oldHeader, index) => {
+        oldHeaders.forEach((oldHeader, index) => {
             newRow[newHeaders[index]] = row[oldHeader];
         });
         return newRow;
@@ -387,7 +408,7 @@ function saveColumnRenames() {
     
     // Update column types
     const newColumnTypes = {};
-    Object.keys(columnTypes).forEach((oldHeader, index) => {
+    oldHeaders.forEach((oldHeader, index) => {
         newColumnTypes[newHeaders[index]] = columnTypes[oldHeader];
     });
     
