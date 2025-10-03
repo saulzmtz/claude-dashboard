@@ -216,11 +216,21 @@ class ChartGenerator {
     }
 
     populateFieldOptions() {
-        if (!this.cleanedData || this.cleanedData.length === 0) return;
+        if (!this.cleanedData || this.cleanedData.length === 0) {
+            console.log('No data available for field population');
+            return;
+        }
 
         const columns = Object.keys(this.cleanedData[0]);
         const numericFields = columns.filter(col => this.columnTypes[col] === 'number');
         const categoricalFields = columns.filter(col => this.columnTypes[col] === 'string');
+
+        console.log('Field population debug:', {
+            columns: columns,
+            columnTypes: this.columnTypes,
+            numericFields: numericFields,
+            categoricalFields: categoricalFields
+        });
 
         // Populate numeric fields for metric selection
         this.populateFieldGrid('numericFields', numericFields, 'metricField');
@@ -234,6 +244,13 @@ class ChartGenerator {
 
     populateFieldGrid(containerId, fields, name) {
         const container = document.getElementById(containerId);
+        console.log(`Populating ${containerId} with ${fields.length} fields:`, fields);
+        
+        if (!container) {
+            console.error(`Container ${containerId} not found`);
+            return;
+        }
+        
         container.innerHTML = '';
 
         fields.forEach(field => {
